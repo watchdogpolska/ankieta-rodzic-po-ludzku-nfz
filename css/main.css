@@ -1,0 +1,270 @@
+/*! HTML5 Boilerplate v5.0 | MIT License | http://h5bp.com/ */
+
+html {
+    color: #222;
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+    vertical-align: middle;
+}
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+textarea {
+    resize: vertical;
+}
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+body{
+    font-family: 'PT Sans', 'Times New Roman', sans-serif;
+}
+.container{
+    width: 900px;
+    margin: 0 auto;
+}
+
+.header {
+
+background: rgba(255,255,255,1);
+background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(190,213,236,1) 47%, rgba(190,213,236,1) 59%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(190,213,236,1)), color-stop(59%, rgba(190,213,236,1)));
+background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(190,213,236,1) 47%, rgba(190,213,236,1) 59%);
+background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(190,213,236,1) 47%, rgba(190,213,236,1) 59%);
+background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(190,213,236,1) 47%, rgba(190,213,236,1) 59%);
+background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(190,213,236,1) 47%, rgba(190,213,236,1) 59%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#bed5ec', GradientType=0 );
+    height: 350px;
+}
+
+.header-top {
+    height: 130px;
+}
+.header-bottom {
+    border-top: 5px solid #FD0000;
+    height: 180px; /* 350 - 130 - 2*20*/
+    background: white;
+    padding: 20px;
+}
+.content{
+    background: #F1F1EF;
+}
+.content .page-content{
+    padding: 20px;
+    background: white;
+}
+
+
+.question{
+    color: #000066;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+.cell-input {
+    padding: 10px 0;
+    text-align: center;
+}
+.cell-input input {
+    border: none;
+    border-bottom: 3px dashed black;
+    text-align: center;
+}
+/*
+    Full-width: 900;
+    Padding: 20;
+    Content: 900 - 2*20 = 860
+    Heading: 860/5 = 172;
+*/
+
+
+table, td, th{
+    border: 1px solid black;
+}
+table th,
+table td {
+    width: 172px;
+}
+
+table td input {
+    width: 152px;
+}
+
+table th.one-and-halt-column,
+table td.one-and-halt-column {
+    width: 258px;
+}
+table th.double-column,
+table td.double-column {
+    width: 344px;
+}
+table th.triple-column,
+table td.triple-column {
+    width: 516px;
+}
+
+
+.text-center{
+    text-align: center;
+}
+
+
+
+/* ==========================================================================
+   Media Queries
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+
+}
+
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+
+}
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* ==========================================================================
+   Print styles
+   ========================================================================== */
+
+@media print {
+    *,
+    *:before,
+    *:after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
