@@ -34,6 +34,7 @@ DJANGO_APPS = (
 
     # Admin
     'django.contrib.admin',
+    'survey',
 )
 THIRD_PARTY_APPS = (
     'crispy_forms',  # Form layouts
