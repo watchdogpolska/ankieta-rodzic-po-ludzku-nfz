@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.contrib.sites.models import Site
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
+from django_object_actions import (DjangoObjectActions,
+                                   takes_instance_or_queryset)
 
 from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
-from django.shortcuts import render
 
 
 class ParticipantInline(admin.TabularInline):
@@ -54,12 +56,12 @@ class CategoryInline(admin.TabularInline):
     '''
     model = Category
 
-
-class SurveyAdmin(admin.ModelAdmin):
+class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
     '''
         Admin View for Survey
     '''
     actions = ['validate']
+    change_actions = ['validate']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
         CategoryInline,
@@ -76,6 +78,7 @@ class SurveyAdmin(admin.ModelAdmin):
         qs = super(SurveyAdmin, self).get_queryset(*args, **kwargs)
         return qs.prefetch_full_content().prefetch_related('participants')
 
+    @takes_instance_or_queryset
     def validate(self, request, queryset):
         context = {}
         context['opts'] = self.opts

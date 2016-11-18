@@ -26,3 +26,7 @@ mysqlclient==1.3.9
 
 # Time zones support
 pytz==2016.7
+
+# Django admin
+django-object-actions==0.8.2
+
