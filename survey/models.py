@@ -118,9 +118,8 @@ class Participant(TimeStampedModel):
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
 
     def get_absolute_url(self, *args, **kwargs):
-        return reverse('survey:list', kwargs={'survey': str(self.survey_id),
-                                              'password': self.password,
-                                              'health_fund': self.health_fund_id})
+        return reverse('survey:list', kwargs={'participant': str(self.id),
+                                              'password': self.password})
 
     class Meta:
         verbose_name = _("Participant")
@@ -207,4 +206,4 @@ class Answer(TimeStampedModel):
         ordering = ['created', ]
 
     def __str__(self):
-        return "%d in %d said %s" % (self.hospital_id, self.question_id, self.answer)
+        return "%d in %d said %s" % (self.hospital_id, self.subquestion_id, self.answer)
