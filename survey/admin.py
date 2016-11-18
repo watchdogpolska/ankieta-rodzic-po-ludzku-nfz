@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
+from django.shortcuts import render
 
 
 class ParticipantInline(admin.TabularInline):
@@ -76,11 +77,15 @@ class SurveyAdmin(admin.ModelAdmin):
         return qs.prefetch_full_content().prefetch_related('participants')
 
     def validate(self, request, queryset):
+        context = {}
+        context['opts'] = self.opts
+        context['original'] = context['title'] = ", ".join(map(str, queryset))
+        context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         log = []
         for survey in queryset:
             log.extend(survey.perform_audit())
-
-        return HttpResponse("<br>\n".join(log))
+        context['log'] = log
+        return render(request, 'survey/survey_admin_validate.html', context=context)
     validate.short_description = _("Verify in detail")
 
 
@@ -144,7 +149,7 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(Question, QuestionAdmin)
 
 
-class AnswerInline(admin.StackedInline):
+class AnswerInline(admin.TabularInline):
     '''
         Stacked Inline View for Answer
     '''

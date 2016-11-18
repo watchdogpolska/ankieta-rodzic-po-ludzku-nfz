@@ -1,0 +1,9 @@
+{% extends 'admin/change_form.html' %}
+
+{% block content %}
+<ul>
+{% for entry in log %}
+    <li>{{entry}}</li>
+{% endfor %}
+</ul>
+{% endblock %}
