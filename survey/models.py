@@ -73,40 +73,30 @@ class Survey(TimeStampedModel):
     participants = models.ManyToManyField(NationalHealtFund, through="Participant")
     objects = SurveyQuerySet.as_manager()
 
+    def _count_msg(self, obj, attribute, found=None, missing=None):
+        count = len(getattr(obj, attribute).all())
+        rel_name = getattr(obj, attribute).model._meta.verbose_name
+        obj_name = obj._meta.verbose_name
+        missing = missing or "%s in %%s %s is missing" % (rel_name, obj_name)
+        found = found or "%%d %s exists in %%s %s" % (rel_name, obj_name)
+        if count:
+            return LogEntry(True, found % (count, obj))
+        return LogEntry(False, missing % (obj))
+
     def perform_audit(self):
         log = []
-        log.append("Audit %s survey" % (str(self)))
+        log.append(LogEntry(None, "Audit %s survey" % (str(self))))
         # Entities auditing
-        entities_count = len(self.participants.all())
-        if not entities_count:
-            log.append("[FAIL] Entities in survey is required")
-        else:
-            log.append("[OK] %d entities exists" % (entities_count, ))
-
-        # Category auditing:
-        category_count = len(self.category_set.all())
-        if not category_count:
-            log.append("[FAIL] Entities in %s survey is missing" % (str(self),))
-        else:
-            log.append("[OK] %d category in %s exists" % (category_count, str(self)))
+        log.append(self._count_msg(self, 'participants'))
+        log.append(self._count_msg(self, 'category_set'))
 
         for category in self.category_set.all():
-            log.append("Audit %s category" % (str(category)))
-            question_count = len(category.question_set.all())
-            if not question_count:
-                log.append("[FAIL] Question in %s category is missing" % (str(category), ))
-            else:
-                log.append("[OK] %d question in %s category exists" % (question_count,
-                                                                       str(category), ))
+            log.append(LogEntry(None, "Audit %s category" % (str(category))))
+            log.append(self._count_msg(category, 'question_set'))
 
             for question in category.question_set.all():
-                log.append("Audit %s question" % (str(question)))
-                subquestion_count = len(question.subquestion_set.all())
-                if not subquestion_count:
-                    log.append("[FAIL] Subquestion in %s question is missing" % (str(question), ))
-                else:
-                    log.append("[OK] %d subquestion in %s question exists" % (subquestion_count,
-                                                                              str(question)))
+                log.append(LogEntry(None, "Audit %s question" % (str(question))))
+                log.append(self._count_msg(question, 'subquestion_set'))
         return log
 
     class Meta:

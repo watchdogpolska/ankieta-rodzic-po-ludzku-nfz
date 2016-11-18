@@ -2,8 +2,8 @@
 
 {% block content %}
 <ul>
-{% for entry in log %}
-    <li>{{entry}}</li>
+{% for status,text in log %}
+    <li>{{status|yesno:"OK,FAIL,--"}}: {{text}}</li>
 {% endfor %}
 </ul>
 {% endblock %}

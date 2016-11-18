@@ -71,7 +71,7 @@ class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
     search_fields = ('title', 'welcome_text', 'end_text', 'submit_text')
 
     def is_valid(self, obj):
-        return all('FAIL' not in x for x in obj.perform_audit())
+        return all(x.status is not False for x in obj.perform_audit())
     is_valid.boolean = True
     is_valid.short_description = _("Is valid?")
 
@@ -101,6 +101,7 @@ class ParticipantAdmin(admin.ModelAdmin):
     '''
         Admin View for Participant
     '''
+
     def get_url(self, obj):
         return '%s%s' % (Site.objects.get_current().domain, obj.get_absolute_url())
     list_display = ('pk', 'survey', 'health_fund', 'password', 'get_url')
