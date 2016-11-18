@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.sites.models import Site
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 
@@ -53,8 +54,6 @@ class CategoryInline(admin.TabularInline):
     model = Category
 
 
-
-
 class SurveyAdmin(admin.ModelAdmin):
     '''
         Admin View for Survey
@@ -84,6 +83,7 @@ class SurveyAdmin(admin.ModelAdmin):
         return HttpResponse("<br>\n".join(log))
     validate.short_description = _("Verify in detail")
 
+
 admin.site.register(Survey, SurveyAdmin)
 
 
@@ -91,7 +91,10 @@ class ParticipantAdmin(admin.ModelAdmin):
     '''
         Admin View for Participant
     '''
-    pass
+    def get_url(self, obj):
+        return '%s%s' % (Site.objects.get_current().domain, obj.get_absolute_url())
+    list_display = ('pk', 'survey', 'health_fund', 'password', 'get_url')
+    list_filter = ('survey', 'health_fund')
 
 
 admin.site.register(Participant, ParticipantAdmin)

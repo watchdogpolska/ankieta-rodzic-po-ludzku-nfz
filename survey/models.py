@@ -1,6 +1,7 @@
 import random
 
 from autoslug.fields import AutoSlugField
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -116,6 +117,11 @@ class Participant(TimeStampedModel):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
 
+    def get_absolute_url(self, *args, **kwargs):
+        return reverse('survey:list', kwargs={'survey': str(self.survey_id),
+                                              'password': self.password,
+                                              'health_fund': self.health_fund_id})
+
     class Meta:
         verbose_name = _("Participant")
         verbose_name_plural = _("Participants")
@@ -191,9 +197,6 @@ class Answer(TimeStampedModel):
     hospital = models.ForeignKey(Hospital, verbose_name=_("Hospital"))
     answer = models.TextField(verbose_name=_("Answer"))
     objects = AnswerQuerySet.as_manager()
-
-    def hospital(self):
-        return self.entity.hospital
 
     class Meta:
         verbose_name = _("Answer")

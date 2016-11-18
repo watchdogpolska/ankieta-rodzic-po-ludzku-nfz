@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<form method="POST">
+{% csrf_token %}
+{% for category, question_set in form.grouped_fields %}
+    <h1>{{category}}</h1>
+    {% for question, subquestion_set in question_set %}
+        <h2>{{question}}</h2>
+        {% for subquestion, field in subquestion_set %}
+            <div>
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+<input type="submit">
+</form>
+{% endblock %}

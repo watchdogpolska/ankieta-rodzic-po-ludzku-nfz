@@ -17,6 +17,7 @@ urlpatterns = [
 
     # User management
     url(r'^users/', include('ankieta_nfz.users.urls', namespace='users')),
+    url(r'^survey/', include('survey.urls', namespace='survey')),
 
     # Your stuff: custom urls includes go here
 
