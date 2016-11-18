@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-18 20:44+0000\n"
-"PO-Revision-Date: 2016-11-18 21:45+0100\n"
+"POT-Creation-Date: 2016-11-18 21:19+0000\n"
+"PO-Revision-Date: 2016-11-18 22:20+0100\n"
 "Last-Translator: Adam Dobrawy <naczelnik@jawnosc.tk>\n"
 "Language-Team: \n"
 "Language: pl\n"
@@ -19,15 +19,19 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: admin.py:72
+#: admin.py:76
 msgid "Is valid?"
 msgstr "Czy poprawna?"
 
-#: admin.py:84
-msgid "Verify in detail"
+#: admin.py:93
+msgid "Validate in detail"
 msgstr "Weryfikuj szczegółowo"
 
-#: models.py:21 models.py:42 models.py:138 models.py:159 models.py:179
+#: admin.py:94
+msgid "Validate"
+msgstr "Weryfikuj"
+
+#: models.py:21 models.py:42 models.py:139 models.py:160 models.py:180
 msgid "Name"
 msgstr "Nazwa"
 
@@ -47,7 +51,7 @@ msgstr "Narodowy Fundusz Zdrowia"
 msgid "National Healt Funds"
 msgstr "Narodowe Fundusze Zdrowia"
 
-#: models.py:48 models.py:200
+#: models.py:48 models.py:201
 msgid "Hospital"
 msgstr "Szpital"
 
@@ -75,63 +79,63 @@ msgstr "Tekst końcowy"
 msgid "Submit text"
 msgstr "Tekst zgłoszeniowy"
 
-#: models.py:107 models.py:137
+#: models.py:109 models.py:138
 msgid "Survey"
 msgstr "Ankieta"
 
-#: models.py:108
+#: models.py:110
 msgid "Surveys"
 msgstr "Ankiety"
 
-#: models.py:118
+#: models.py:120
 msgid "Password"
 msgstr "Hasło"
 
-#: models.py:126 models.py:198
+#: models.py:127 models.py:199
 msgid "Participant"
 msgstr "Uczestnik"
 
-#: models.py:127
+#: models.py:128
 msgid "Participants"
 msgstr "Uczestnicy"
 
-#: models.py:139
+#: models.py:140
 msgid "Description"
 msgstr "Opis"
 
-#: models.py:140 models.py:160 models.py:180
+#: models.py:141 models.py:161 models.py:181
 msgid "Order"
 msgstr "Kolejnosć"
 
-#: models.py:144 models.py:158
+#: models.py:145 models.py:159
 msgid "Category"
 msgstr "Kategoria"
 
-#: models.py:145
+#: models.py:146
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models.py:164 models.py:178
+#: models.py:165 models.py:179
 msgid "Question"
 msgstr "Pytanie"
 
-#: models.py:165
+#: models.py:166
 msgid "Questions"
 msgstr "Pytania"
 
-#: models.py:184
+#: models.py:185
 msgid "Subquestion"
 msgstr "Podpytanie"
 
-#: models.py:185 models.py:199
+#: models.py:186 models.py:200
 msgid "Subquestions"
 msgstr "Podpytania"
 
-#: models.py:201 models.py:205
+#: models.py:202 models.py:206
 msgid "Answer"
 msgstr "Odpowiedź"
 
-#: models.py:206
+#: models.py:207
 msgid "Answers"
 msgstr "Odpowiedzi"
 

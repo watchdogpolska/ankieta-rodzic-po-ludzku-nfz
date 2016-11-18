@@ -56,6 +56,7 @@ class CategoryInline(admin.TabularInline):
     '''
     model = Category
 
+
 class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
     '''
         Admin View for Survey
@@ -89,7 +90,8 @@ class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
             log.extend(survey.perform_audit())
         context['log'] = log
         return render(request, 'survey/survey_admin_validate.html', context=context)
-    validate.short_description = _("Verify in detail")
+    validate.short_description = _("Validate in detail")
+    validate.label = _("Validate")
 
 
 admin.site.register(Survey, SurveyAdmin)

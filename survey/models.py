@@ -82,25 +82,27 @@ class Survey(TimeStampedModel):
         # Category auditing:
         category_count = len(self.category_set.all())
         if not category_count:
-            log.append("[FAIL] Entities in survey is required")
+            log.append("[FAIL] Entities in %s survey is missing" % (str(self),))
         else:
-            log.append("[OK] %d category exists" % (category_count, ))
+            log.append("[OK] %d category in %s exists" % (category_count, str(self)))
 
         for category in self.category_set.all():
             log.append("Audit %s category" % (str(category)))
             question_count = len(category.question_set.all())
             if not question_count:
-                log.append("[FAIL] Question in each category is required")
+                log.append("[FAIL] Question in %s category is missing" % (str(category), ))
             else:
-                log.append("[OK] %d category exists" % (question_count, ))
+                log.append("[OK] %d question in %s category exists" % (question_count,
+                                                                       str(category), ))
 
             for question in category.question_set.all():
                 log.append("Audit %s question" % (str(question)))
                 subquestion_count = len(question.subquestion_set.all())
                 if not subquestion_count:
-                    log.append("[FAIL] Subquestion for each question is required")
+                    log.append("[FAIL] Subquestion in %s question is missing" % (str(question), ))
                 else:
-                    log.append("[OK] %d subquestion exists" % (subquestion_count, ))
+                    log.append("[OK] %d subquestion in %s question exists" % (subquestion_count,
+                                                                              str(question)))
         return log
 
     class Meta:
