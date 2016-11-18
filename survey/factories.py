@@ -78,8 +78,8 @@ class SubquestionFactory(factory.django.DjangoModelFactory):
 class AnswerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Answer
-
     participant = factory.SubFactory(ParticipantFactory,
                                      survey=factory.SelfAttribute('..subquestion.question.category.survey'))
     subquestion = factory.SubFactory(SubquestionFactory)
+    hospital = factory.SubFactory(HospitalFactory)
     answer = factory.Sequence(lambda n: n)

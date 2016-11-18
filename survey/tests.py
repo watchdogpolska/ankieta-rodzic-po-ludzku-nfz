@@ -55,12 +55,11 @@ class QuestionFormTestCase(TestCase):
     def setUp(self):
         self.question = QuestionFactory()
         self.subquestions = SubquestionFactory.create_batch(size=5, question=self.question)
-        self.participant = ParticipantFactory()
+        self.participant = ParticipantFactory(survey=self.question.category.survey)
         self.hospital = HospitalFactory(health_fund=self.participant.health_fund)
 
     def test_grouped_fields(self):
         form = SurveyForm(participant=self.participant,
-                          survey=self.question.category.survey,
                           hospital=self.hospital)
         self.assertEqual(len(form.grouped_fields()), 1)
         self.assertEqual(len(form.grouped_fields()[0].set), 1)
@@ -68,7 +67,6 @@ class QuestionFormTestCase(TestCase):
 
     def test_fields_count(self):
         form = SurveyForm(participant=self.participant,
-                          survey=self.question.category.survey,
                           hospital=self.hospital)
         self.assertEqual(len(form.fields), 1 * 5)
 
@@ -76,6 +74,5 @@ class QuestionFormTestCase(TestCase):
         data = {("sq-%d" % (x.pk)): x.pk for x in self.subquestions}
         form = SurveyForm(data,
                           participant=self.participant,
-                          survey=self.question.category.survey,
                           hospital=self.hospital)
         self.assertEqual(form.is_valid(), True)
