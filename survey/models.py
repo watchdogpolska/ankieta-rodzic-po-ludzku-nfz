@@ -137,12 +137,13 @@ class Category(TimeStampedModel):
     survey = models.ForeignKey(to=Survey, verbose_name=_("Survey"))
     name = models.CharField(verbose_name=_("Name"), max_length=100)
     description = models.TextField(verbose_name=_("Description"), blank=True)
+    ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
     objects = CategoryQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
-        ordering = ['created', ]
+        ordering = ['ordering', 'created', ]
 
     def __str__(self):
         return self.name
@@ -156,12 +157,13 @@ class QuestionQuerySet(models.QuerySet):
 class Question(TimeStampedModel):
     category = models.ForeignKey(to=Category, verbose_name=_("Category"))
     name = models.CharField(verbose_name=_("Name"), max_length=250)
+    ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
     objects = QuestionQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
-        ordering = ['created', ]
+        ordering = ['ordering', 'created', ]
 
     def __str__(self):
         return self.name
@@ -175,12 +177,13 @@ class SubquestionQuerySet(models.QuerySet):
 class Subquestion(TimeStampedModel):
     question = models.ForeignKey(to=Question, verbose_name=_("Question"))
     name = models.CharField(verbose_name=_("Name"), max_length=100)
+    ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
     objects = SubquestionQuerySet.as_manager()
 
     class Meta:
         verbose_name = _("Subquestion")
         verbose_name_plural = _("Subquestions")
-        ordering = ['created', ]
+        ordering = ['ordering', 'created', ]
 
     def __str__(self):
         return self.name
