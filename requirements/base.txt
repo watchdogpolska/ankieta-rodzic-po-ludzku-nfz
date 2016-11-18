@@ -10,14 +10,13 @@ django==1.10.3
 # Configuration
 django-environ==0.4.1
 
-
-
 # Forms
 django-braces==1.10.0
 django-crispy-forms==1.6.1
 
 # Models
 django-model-utils==2.6
+django-autoslug==1.9.3
 
 # Images
 Pillow==3.4.2
