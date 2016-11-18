@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block content %}
 <ul>
 {% for object, link, status in linked_hospitals %}
     <li><a href="{{link}}">{{object}}</a> {{status}}</li>
 {% endfor %}
 </ul>
+
+<a href="{{print_url}}">{% trans 'Print' %}</a>
 {% endblock %}

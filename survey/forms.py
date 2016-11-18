@@ -10,11 +10,14 @@ Group = namedtuple('Group', ['obj', 'set'])
 class SurveyForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.participant = kwargs.pop('participant')
-        self.survey = kwargs.pop('survey')
         self.hospital = kwargs.pop('hospital')
+
+        self.survey = self.participant.survey
+
         answer_qs = Answer.objects.filter(participant=self.participant,
                                           hospital=self.hospital).all()
         initial = {x.subquestion.pk: x.answer for x in answer_qs}
+
         super(SurveyForm, self).__init__(*args, **kwargs)
         for category in self.survey.category_set.all():
             for question in category.question_set.all():

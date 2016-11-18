@@ -1,0 +1,11 @@
+{% for category, question_set in form.grouped_fields %}
+    <h2>{{category}}</h2>
+    {% for question, subquestion_set in question_set %}
+        <h3>{{question}}</h3>
+        {% for subquestion, field in subquestion_set %}
+            <div>
+            {{ field.label }}: [{{label.initial}}]
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endfor %}

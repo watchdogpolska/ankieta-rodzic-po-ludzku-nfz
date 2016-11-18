@@ -3,7 +3,6 @@ import random
 from autoslug.fields import AutoSlugField
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Count
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -34,14 +33,11 @@ class NationalHealtFund(TimeStampedModel):
 
 
 class HospitalQuerySet(models.QuerySet):
-    def answer_status(self, participant):
-        qs = self.filter(answer__participant=1).annotate(answer_count=Count('answer'))
-        qs = qs.annotate(status=models.Case(
-            models.When(answer_count=0, then=models.Value(False)),
-            default=models.Value(True),
-            output_field=models.BooleanField())
-        )
-        return qs
+    def answer_fetch(self, participant):
+        prefetch = models.Prefetch(lookup='answer_set',
+                                   to_attr='answer_participant',
+                                   queryset=Answer.objects.filter(participant=participant))
+        return self.prefetch_related(prefetch)
 
 
 @python_2_unicode_compatible
@@ -122,10 +118,16 @@ class Survey(TimeStampedModel):
         return self.title
 
 
+class ParticipantQuerySet(models.QuerySet):
+    def with_survey(self):
+        return self.prefetch_related('survey__category_set__question_set__subquestion_set')
+
+
 class Participant(TimeStampedModel):
     health_fund = models.ForeignKey(NationalHealtFund, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
+    objects = ParticipantQuerySet.as_manager()
 
     def get_absolute_url(self, *args, **kwargs):
         return reverse('survey:list', kwargs={'participant': str(self.id),

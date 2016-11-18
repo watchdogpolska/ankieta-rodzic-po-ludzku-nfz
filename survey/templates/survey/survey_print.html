@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for hospital, form in hospital_forms %}
+    <h1>{{hospital}}</h1>
+    {% include 'survey/_form_print.html' with form=form %}
+{% endfor %}
+
+{% endblock %}
