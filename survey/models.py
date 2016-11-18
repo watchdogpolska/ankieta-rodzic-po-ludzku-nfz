@@ -65,7 +65,7 @@ class Survey(TimeStampedModel):
     welcome_text = models.TextField(verbose_name=_("Welcome text"), blank=True)
     end_text = models.TextField(verbose_name=_("End text"), blank=True)
     submit_text = models.TextField(verbose_name=_("Submit text"), blank=True)
-    participants = models.ManyToManyField(Hospital, through="Participant")
+    participants = models.ManyToManyField(NationalHealtFund, through="Participant")
     objects = SurveyQuerySet.as_manager()
 
     def perform_audit(self):
@@ -112,7 +112,7 @@ class Survey(TimeStampedModel):
 
 
 class Participant(TimeStampedModel):
-    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
+    health_fund = models.ForeignKey(NationalHealtFund, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
 
@@ -188,6 +188,7 @@ class AnswerQuerySet(models.QuerySet):
 class Answer(TimeStampedModel):
     participant = models.ForeignKey(Participant, verbose_name=_("Participant"))
     subquestion = models.ForeignKey(Subquestion, verbose_name=_("Subquestions"))
+    hospital = models.ForeignKey(Hospital, verbose_name=_("Hospital"))
     answer = models.TextField(verbose_name=_("Answer"))
     objects = AnswerQuerySet.as_manager()
 

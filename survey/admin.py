@@ -6,9 +6,9 @@ from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
 
 
-class ParticipantInline(admin.StackedInline):
+class ParticipantInline(admin.TabularInline):
     '''
-        Stacked Inline View for Participant
+        Tabular Inline View for Participant
     '''
     model = Participant
 
@@ -17,10 +17,7 @@ class HospitalAdmin(admin.ModelAdmin):
     '''
         Admin View for Hospital
     '''
-    list_display = ('name', 'email', 'identifier', 'created', 'modified')
-    inlines = [
-        ParticipantInline,
-    ]
+    list_display = ('name', 'email', 'health_fund', 'identifier', 'created', 'modified')
     search_fields = ('name', 'email', 'identifier')
 
 
@@ -41,7 +38,8 @@ class NationalHealtFundAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     inlines = [
-        HospitalInline
+        HospitalInline,
+        ParticipantInline,
     ]
 
 
@@ -55,11 +53,6 @@ class CategoryInline(admin.TabularInline):
     model = Category
 
 
-class ParticipantInline(admin.TabularInline):
-    '''
-        Tabular Inline View for Participant
-    '''
-    model = Participant
 
 
 class SurveyAdmin(admin.ModelAdmin):

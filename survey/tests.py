@@ -43,3 +43,8 @@ class SubquestionFactoryTestCase(TestCase):
 class AnswerFactoryTestCase(TestCase):
     def test_is_build(self):
         AnswerFactory()
+
+    def test_consistent_survey(self):
+        answer = AnswerFactory()
+        self.assertEqual(answer.subquestion.question.category.survey,
+                         answer.participant.survey)
