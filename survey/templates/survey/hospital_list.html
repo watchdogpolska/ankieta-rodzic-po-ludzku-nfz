@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <ul>
-{% for object, link in linked_hospitals %}
-    <li><a href="{{link}}">{{object}}</a></li>
+{% for object, link, status in linked_hospitals %}
+    <li><a href="{{link}}">{{object}}</a> {{status}}</li>
 {% endfor %}
 </ul>
 {% endblock %}

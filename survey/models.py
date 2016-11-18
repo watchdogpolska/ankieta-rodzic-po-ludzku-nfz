@@ -3,6 +3,7 @@ import random
 from autoslug.fields import AutoSlugField
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Count
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -33,7 +34,14 @@ class NationalHealtFund(TimeStampedModel):
 
 
 class HospitalQuerySet(models.QuerySet):
-    pass
+    def answer_status(self, participant):
+        qs = self.filter(answer__participant=1).annotate(answer_count=Count('answer'))
+        qs = qs.annotate(status=models.Case(
+            models.When(answer_count=0, then=models.Value(False)),
+            default=models.Value(True),
+            output_field=models.BooleanField())
+        )
+        return qs
 
 
 @python_2_unicode_compatible

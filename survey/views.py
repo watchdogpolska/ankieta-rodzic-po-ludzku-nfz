@@ -10,7 +10,7 @@ from django.views.generic import FormView, ListView
 from .forms import SurveyForm
 from .models import Hospital, Participant
 
-LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link'])
+LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
 
 
 class HospitalListView(ListView):
@@ -21,6 +21,7 @@ class HospitalListView(ListView):
         qs = super(HospitalListView, self).get_queryset(*args, **kwargs)
         qs = qs.filter(health_fund__participant__password=self.kwargs['password'],
                        health_fund__participant=self.kwargs['participant']).all()
+        qs = qs.answer_status(self.kwargs['participant'])
         return qs
 
     def get_context_data(self, **kwargs):
@@ -30,7 +31,7 @@ class HospitalListView(ListView):
             link = reverse('survey:survey', kwargs={'password': self.kwargs['password'],
                                                     'participant': self.kwargs['participant'],
                                                     'hospital': hospital.pk})
-            linked_hospitals.append(LinkedHospital(hospital, link))
+            linked_hospitals.append(LinkedHospital(hospital, link, hospital.status))
         context['linked_hospitals'] = linked_hospitals
         return context
 
