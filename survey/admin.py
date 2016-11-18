@@ -1,3 +1,6 @@
+import csv
+from itertools import groupby
+
 from django.contrib import admin
 from django.contrib.sites.models import Site
 from django.http import HttpResponse
@@ -62,7 +65,7 @@ class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
         Admin View for Survey
     '''
     actions = ['validate']
-    change_actions = ['validate']
+    change_actions = ['validate','export']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
         CategoryInline,
@@ -92,6 +95,31 @@ class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
         return render(request, 'survey/survey_admin_validate.html', context=context)
     validate.short_description = _("Validate in detail")
     validate.label = _("Validate")
+
+    def export(self, request, obj):
+        response = HttpResponse(content_type='text/csv')
+        filename = "export-%s.csv" % (str(obj), )
+        response['Content-Disposition'] = 'attachment; filename="%s"' % (filename, )
+
+        def get_key(subquestion):
+            return "{title}:{pk}".format(title=subquestion.name, pk=subquestion.pk)
+
+        fieldnames = ['Health fund', 'Hospital']
+        fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
+                       filter(question__category__survey=obj).all()]
+
+        answer_qs = Answer.objects.filter(participant__survey=obj).all()
+        writer = csv.DictWriter(response, fieldnames=fieldnames)
+        writer.writeheader()
+
+        def key(x):
+            return (x.participant.health_fund, x.hospital)
+
+        for (participant, hospital), g in groupby(answer_qs, key):
+            row = {'Health fund': participant, 'Hospital': hospital}
+            row.update({get_key(answer.subquestion): answer.answer for answer in g})
+            writer.writerow(row)
+        return response
 
 
 admin.site.register(Survey, SurveyAdmin)
