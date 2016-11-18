@@ -4,7 +4,7 @@
         <h3>{{question}}</h3>
         {% for subquestion, field in subquestion_set %}
             <div>
-            {{ field.label }}: [{{label.initial}}]
+            {{ field.label }}: [{{field.initial}}]
             </div>
         {% endfor %}
     {% endfor %}
