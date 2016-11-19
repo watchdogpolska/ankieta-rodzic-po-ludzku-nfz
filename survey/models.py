@@ -10,6 +10,7 @@ from collections import namedtuple
 
 
 LogEntry = namedtuple('LogEntry', ['status', 'text'])
+LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
 
 
 def get_secret():
@@ -42,6 +43,18 @@ class HospitalQuerySet(models.QuerySet):
                                    to_attr='answer_participant',
                                    queryset=Answer.objects.filter(participant=participant))
         return self.prefetch_related(prefetch)
+
+    def linked(self, participant, password):
+        linked_hospitals = []
+        for hospital in self:
+            link = reverse('survey:survey', kwargs={'password': password,
+                                                    'participant': participant,
+                                                    'hospital': hospital.pk})
+            linked = LinkedHospital(obj=hospital,
+                                    link=link,
+                                    status=len(hospital.answer_participant) > 0)
+            linked_hospitals.append(linked)
+        return linked_hospitals
 
 
 @python_2_unicode_compatible

@@ -11,7 +11,6 @@ from reversion.views import RevisionMixin
 from .forms import SurveyForm
 from .models import Hospital, Participant
 
-LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
 
 SurveyHospitalForm = namedtuple('SurveyHospitalForm', ['hospital', 'form'])
 
@@ -31,20 +30,14 @@ class HospitalListView(HospitalMixin, ListView):
     model = Hospital
     template_name = 'survey/hospital_list.html'
 
+    def get_print_url(self):
+        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
     def get_context_data(self, **kwargs):
         context = super(HospitalListView, self).get_context_data(**kwargs)
-        linked_hospitals = []
-        for hospital in self.object_list:
-            link = reverse('survey:survey', kwargs={'password': self.kwargs['password'],
-                                                    'participant': self.kwargs['participant'],
-                                                    'hospital': hospital.pk})
-            linked = LinkedHospital(obj=hospital,
-                                    link=link,
-                                    status=len(hospital.answer_participant) > 0)
-            linked_hospitals.append(linked)
-        context['linked_hospitals'] = linked_hospitals
-        context['print_url'] = reverse('survey:print', kwargs={'password': self.kwargs['password'],
-                                                               'participant': self.kwargs['participant']})
+        context['linked_hospitals'] = self.object_list.linked(**self.kwargs)
+        context['print_url'] = self.get_print_url()
         return context
 
 
@@ -65,12 +58,9 @@ class SurveyPrintView(HospitalListView):
 
     def get_context_data(self, **kwargs):
         context = super(SurveyPrintView, self).get_context_data(**kwargs)
-        hospital_forms = []
-        for hospital in self.object_list:
-            linked = SurveyHospitalForm(hospital=hospital,
-                                        form=self.get_form(hospital))
-            hospital_forms.append(linked)
-        context['hospital_forms'] = hospital_forms
+        context['hospital_forms'] = [SurveyHospitalForm(hospital=hospital,
+                                                        form=self.get_form(hospital))
+                                     for hospital in self.object_list]
         return context
 
 
