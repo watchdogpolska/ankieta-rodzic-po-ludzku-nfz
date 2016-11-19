@@ -1,20 +1,38 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'survey/base.html' %}
 
+{% block headerbottom%}
+<h1>Ankieta NFZ</h1>
+{{ survey.welcome_text }}
+{% endblock headerbottom %}
+
+{% block content %}
 <form method="POST">
 {% csrf_token %}
-{% for category, question_set in form.grouped_fields %}
-    <h1>{{category}}</h1>
-    {% for question, subquestion_set in question_set %}
-        <h2>{{question}}</h2>
-        {% for subquestion, field in subquestion_set %}
-            <div>
-            {{ field.errors }}
-            {{ field.label_tag }} {{ field }}
-            </div>
-        {% endfor %}
-    {% endfor %}
-{% endfor %}
-<input type="submit">
+  {% for category, question_set in form.grouped_fields %}
+      <h3>{{category}}</h3>
+      {% for question, subquestion_set in question_set %}
+          <h4>{{question}}</h4>
+          {% for subquestion, field in subquestion_set %}
+              <div>
+              {{ field.errors }}
+              {{ field.label_tag }} {{ field }}
+              </div>
+          {% endfor %}
+      {% endfor %}
+  {% endfor %}
+  <div>
+    {{ survey.end_text }}
+  </div>
+  <div>
+    <button type="submit" class="btn-brand">Zapisz dane</button>
+  </div>
 </form>
 {% endblock %}
+
+{% block javscripts %}
+{{ block.super }}
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$('h3').stick_in_parent();
+</script>
+{% endblock javscripts %}

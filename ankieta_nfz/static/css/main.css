@@ -88,11 +88,33 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 
-.question{
+h1, h2, h3, h4, h5, h6{
     color: #000066;
     font-weight: 700;
-    font-size: 1.1em;
+    font-size: 1.8em;
+    background: white;
 }
+
+h2{
+    font-size: 1.7em;
+}
+h3{
+    font-size: 1.6em;
+}
+h4{
+    font-size: 1.4em;
+}
+h5{
+    font-size: 1.3em;
+}
+h6{
+    font-size: 1.2em;
+}
+
+
+
+
+
 .cell-input {
     padding: 10px 0;
     text-align: center;
@@ -139,6 +161,25 @@ table td.triple-column {
 .text-center{
     text-align: center;
 }
+
+.btn-brand {
+  border: 1px solid #445B95;
+  border-radius: 5px;
+  color: #204180;
+  padding: 10px 30px;
+  font-weight: bold;
+  font-size: 16px;
+  background: -webkit-linear-gradient(93deg, #c7ccdb 30%, white 60%);
+  background: linear-gradient(-3deg, #c7ccdb 30%, white 60%);
+  text-transform: uppercase;
+  box-shadow: 5px 5px 8px 2px #C8CBDF;
+  text-decoration: none;
+}
+.btn-brand:hover, .btn-brand:active, .btn-brand:focus {
+  background: -webkit-linear-gradient(93deg, #a8b0c7 30%, white 80%);
+  background: linear-gradient(-3deg, #a8b0c7 30%, white 80%);
+}
+
 
 
 

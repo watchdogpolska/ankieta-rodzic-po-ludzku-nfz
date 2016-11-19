@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'survey/base.html' %}
 {% load i18n %}
 {% block content %}
 <ul>
@@ -7,5 +7,5 @@
 {% endfor %}
 </ul>
 
-<a href="{{print_url}}">{% trans 'Print' %}</a>
+<a href="{{print_url}}" class="btn-brand">{% trans 'Print' %}</a>
 {% endblock %}
