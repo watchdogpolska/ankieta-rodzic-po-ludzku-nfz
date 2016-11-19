@@ -66,7 +66,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         Admin View for Survey
     '''
     actions = ['validate']
-    change_actions = ['validate','export']
+    change_actions = ['validate', 'export']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
         CategoryInline,
@@ -132,7 +132,7 @@ class ParticipantAdmin(VersionAdmin):
     '''
 
     def get_url(self, obj):
-        return '%s%s' % (Site.objects.get_current().domain, obj.get_absolute_url())
+        return 'http://%s%s' % (Site.objects.get_current().domain, obj.get_absolute_url())
     list_display = ('pk', 'survey', 'health_fund', 'password', 'get_url')
     list_filter = ('survey', 'health_fund')
 

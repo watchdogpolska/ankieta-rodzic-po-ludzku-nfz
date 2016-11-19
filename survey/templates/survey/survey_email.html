@@ -1,0 +1,16 @@
+Szanowni Państwo,
+
+Uprzejmie potwierdzamy zapisanie odpowiedzi {{participant.health_fund}} na pytania na temat "{{hospital}}". 
+{% if linked_list_left %}
+Pragniemy podkreślić, że wciąż oczekujemy na udzielenie odpowiedzi na temat {{linked_left}} z {{linked_total}} instytucji:{% for linked in linked_list_left %}
+- {{linked.obj}} - {{linked.link}}{% endfor %}
+{% endif %}
+Poniżej przedstawiamy zestawienie udzielonych odpowiedzi na temat "{{hospital}}":
+{% for category, question_set in object_list %}
+# {{category}}
+{% for question, subquestion_set in question_set %}## {{question}}
+{% for subquestion, field in subquestion_set %}{{subquestion.name}}: {{field.0.answer}}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+Z poważaniem,

@@ -88,6 +88,7 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
         kw = super(HospitalSurveyView, self).get_form_kwargs(*args, **kwargs)
         kw['participant'] = self.participant
         kw['hospital'] = self.hospital
+        kw['user'] = self.user
         return kw
 
     def get_context_data(self, **kwargs):

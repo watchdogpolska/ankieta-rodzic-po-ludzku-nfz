@@ -1,13 +1,13 @@
 import random
+from collections import namedtuple
 
 from autoslug.fields import AutoSlugField
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
-from collections import namedtuple
-
 
 LogEntry = namedtuple('LogEntry', ['status', 'text'])
 LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
@@ -50,6 +50,7 @@ class HospitalQuerySet(models.QuerySet):
             link = reverse('survey:survey', kwargs={'password': password,
                                                     'participant': participant,
                                                     'hospital': hospital.pk})
+            link = 'http://%s%s' % (Site.objects.get_current().domain, link)
             linked = LinkedHospital(obj=hospital,
                                     link=link,
                                     status=len(hospital.answer_participant) > 0)
@@ -225,4 +226,4 @@ class Answer(TimeStampedModel):
         ordering = ['participant', 'hospital', 'subquestion']
 
     def __str__(self):
-        return "%d in %d said %s" % (self.hospital_id, self.subquestion_id, self.answer)
+        return self.answer
