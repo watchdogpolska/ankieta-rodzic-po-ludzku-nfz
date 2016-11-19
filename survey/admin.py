@@ -195,7 +195,7 @@ class SubquestionAdmin(VersionAdmin):
     '''
         Admin View for Subquestion
     '''
-    list_display = ('name', 'question',)
+    list_display = ('name', 'question', 'kind')
     list_filter = ('question__category__survey',)
     inlines = [
         AnswerInline,

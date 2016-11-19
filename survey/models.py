@@ -194,9 +194,19 @@ class SubquestionQuerySet(models.QuerySet):
 
 @python_2_unicode_compatible
 class Subquestion(TimeStampedModel):
+    KIND_INT = 'int'
+    KIND_TEXT = 'text'
+    KIND_LTEXT = 'ltext'
+    KIND = ((KIND_INT, 'Integer'),
+            (KIND_TEXT, 'Text'),
+            (KIND_LTEXT, 'Long text'))
     question = models.ForeignKey(to=Question, verbose_name=_("Question"))
     name = models.CharField(verbose_name=_("Name"), max_length=100)
     ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
+    kind = models.CharField(verbose_name=_("Kind of answer"),
+                            choices=KIND,
+                            max_length=5,
+                            default=KIND_TEXT)
     objects = SubquestionQuerySet.as_manager()
 
     class Meta:
@@ -226,4 +236,4 @@ class Answer(TimeStampedModel):
         ordering = ['participant', 'hospital', 'subquestion']
 
     def __str__(self):
-        return self.answer
+        return str(self.answer)

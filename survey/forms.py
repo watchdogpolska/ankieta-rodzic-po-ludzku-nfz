@@ -1,12 +1,13 @@
 from collections import namedtuple
-from django.conf import settings
+
+from ankieta_nfz.users.models import User
 from django import forms
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
-from ankieta_nfz.users.models import User
-from .models import Answer, Hospital
+from .models import Answer, Hospital, Subquestion
 
 Group = namedtuple('Group', ['obj', 'set'])
 
@@ -21,16 +22,27 @@ class SurveyForm(forms.Form):
 
         answer_qs = Answer.objects.filter(participant=self.participant,
                                           hospital=self.hospital).all()
-        initial = {x.subquestion_id: x.answer for x in answer_qs}
+        self.initial = {x.subquestion_id: x.answer for x in answer_qs}
 
         super(SurveyForm, self).__init__(*args, **kwargs)
         for category in self.survey.category_set.all():
             for question in category.question_set.all():
                 for subquestion in question.subquestion_set.all():
                     key = self.get_key(subquestion)
-                    field = forms.CharField(label=subquestion.name,
-                                            initial=initial.get(subquestion.pk, ''))
+                    field = self.get_field(subquestion)
                     self.fields[key] = field
+
+    def get_field(self, subquestion):
+        if subquestion.kind == Subquestion.KIND_INT:
+            return forms.IntegerField(label=subquestion.name,
+                                      initial=self.initial.get(subquestion.pk, ''))
+        if subquestion.kind == Subquestion.KIND_TEXT:
+            return forms.CharField(label=subquestion.name,
+                                   initial=self.initial.get(subquestion.pk, ''))
+        if subquestion.kind == Subquestion.KIND_LTEXT:
+            return forms.CharField(label=subquestion.name,
+                                   initial=self.initial.get(subquestion.pk, ''),
+                                   widget=forms.widgets.Textarea())
 
     def get_key(self, subquestion):
         return 'sq-{subquestion}'.format(subquestion=subquestion.pk)

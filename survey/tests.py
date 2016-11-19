@@ -6,6 +6,7 @@ from .factories import (AnswerFactory, CategoryFactory, HospitalFactory,
                         NationalHealtFundFactory, ParticipantFactory,
                         QuestionFactory, SubquestionFactory, SurveyFactory)
 from .forms import SurveyForm
+from .models import Subquestion
 
 
 class NationalHealtFundFactoryTestCase(TestCase):
@@ -86,7 +87,7 @@ class QuestionFormTestCase(TestCase):
         self.assertEqual(form.is_valid(), True)
 
     def test_form_notification_contains_answer(self):
-        TEXT = "1234xx"*5
+        TEXT = "1234xx" * 5
         data = {("sq-%d" % (x.pk)): x.pk for x in self.subquestions}
         data["sq-%d" % (self.subquestions[0].pk)] = TEXT
         form = SurveyForm(data,
@@ -131,3 +132,14 @@ class QuestionFormTestCase(TestCase):
         form.save()
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to[0], self.participant.health_fund.email)
+
+    def test_integer_field_validation(self):
+        sq = SubquestionFactory(question=self.question,
+                                kind=Subquestion.KIND_INT)
+        data = {("sq-%d" % (x.pk)): x.pk for x in self.subquestions}
+        data['sq-%d' % (sq.pk)] = 'SOME_TEXT'
+        form = SurveyForm(data,
+                          participant=self.participant,
+                          hospital=self.hospital,
+                          user=UserFactory())
+        self.assertEqual(form.is_valid(), False)
