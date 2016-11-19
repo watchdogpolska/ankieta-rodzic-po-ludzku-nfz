@@ -20,6 +20,9 @@ class SurveyFactoryTestCase(TestCase):
     def test_build(self):
         SurveyFactory()
 
+    def test_build_with_participants(self):
+        SurveyFactory(participants=NationalHealtFundFactory.create_batch(size=10))
+
 
 class CategoryFactoryTestCase(TestCase):
     def test_build(self):

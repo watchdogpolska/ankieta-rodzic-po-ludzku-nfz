@@ -38,8 +38,9 @@ class SurveyFactory(factory.django.DjangoModelFactory):
 
         if extracted:
             # A list of groups were passed in, use them
-            for participant in extracted:
-                self.participants.add(participant)
+            for health_fund in extracted:
+                models.Participant.objects.create(health_fund=health_fund,
+                                                  survey=self)
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):
