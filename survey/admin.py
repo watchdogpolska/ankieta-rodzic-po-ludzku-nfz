@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from django_object_actions import (DjangoObjectActions,
                                    takes_instance_or_queryset)
+from reversion.admin import VersionAdmin
 
 from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
@@ -20,7 +21,7 @@ class ParticipantInline(admin.TabularInline):
     model = Participant
 
 
-class HospitalAdmin(admin.ModelAdmin):
+class HospitalAdmin(VersionAdmin):
     '''
         Admin View for Hospital
     '''
@@ -38,7 +39,7 @@ class HospitalInline(admin.TabularInline):
     model = Hospital
 
 
-class NationalHealtFundAdmin(admin.ModelAdmin):
+class NationalHealtFundAdmin(VersionAdmin):
     '''
         Admin View for NationalHealtFund
     '''
@@ -60,7 +61,7 @@ class CategoryInline(admin.TabularInline):
     model = Category
 
 
-class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
+class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Survey
     '''
@@ -125,7 +126,7 @@ class SurveyAdmin(DjangoObjectActions, admin.ModelAdmin):
 admin.site.register(Survey, SurveyAdmin)
 
 
-class ParticipantAdmin(admin.ModelAdmin):
+class ParticipantAdmin(VersionAdmin):
     '''
         Admin View for Participant
     '''
@@ -146,7 +147,7 @@ class QuestionInline(admin.TabularInline):
     model = Question
 
 
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(VersionAdmin):
     '''
         Admin View for Category
     '''
@@ -168,7 +169,7 @@ class SubquestionInline(admin.TabularInline):
     model = Subquestion
 
 
-class QuestionAdmin(admin.ModelAdmin):
+class QuestionAdmin(VersionAdmin):
     '''
         Admin View for Question
     '''
@@ -190,7 +191,7 @@ class AnswerInline(admin.TabularInline):
     model = Answer
 
 
-class SubquestionAdmin(admin.ModelAdmin):
+class SubquestionAdmin(VersionAdmin):
     '''
         Admin View for Subquestion
     '''
@@ -202,3 +203,14 @@ class SubquestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Subquestion, SubquestionAdmin)
+
+
+class AnswerAdmin(VersionAdmin):
+    '''
+        Admin View for Answer
+    '''
+    list_display = ('answer', 'participant', 'subquestion', 'hospital')
+    list_filter = ('participant', 'subquestion', 'hospital',)
+
+
+admin.site.register(Answer, AnswerAdmin)

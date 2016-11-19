@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
 from django.views.generic import FormView, ListView
+from reversion.views import RevisionMixin
 
 from .forms import SurveyForm
 from .models import Hospital, Participant
@@ -73,7 +74,7 @@ class SurveyPrintView(HospitalListView):
         return context
 
 
-class HospitalSurveyView(FormValidMessageMixin, FormView):
+class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
     form_class = SurveyForm
     template_name = 'survey/hospital_form.html'
 

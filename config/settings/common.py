@@ -40,6 +40,7 @@ THIRD_PARTY_APPS = (
     'crispy_forms',  # Form layouts
     'django_object_actions',
     'request',
+    'reversion',
 )
 
 # Apps specific for this project go here.
