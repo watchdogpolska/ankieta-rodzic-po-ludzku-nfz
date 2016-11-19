@@ -29,4 +29,4 @@ pytz==2016.7
 
 # Django admin
 django-object-actions==0.8.2
-
+django-request==1.5.1
