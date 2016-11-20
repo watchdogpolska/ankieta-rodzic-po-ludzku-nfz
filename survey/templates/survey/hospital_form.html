@@ -1,12 +1,11 @@
 {% extends 'survey/base.html' %}
 {% load i18n %}
-{% block headerbottom%}
-<h1>{{survey}} <small>{{hospital}}</small></h1>
-{{ survey.instruction | safe }}
-{% endblock headerbottom %}
 
 {% block content %}
+<h1>{{survey}} <small>{{hospital}}</small></h1>
+{{ survey.instruction | safe }}
 <form method="POST">
+
 {% csrf_token %}
   {% for category, question_set in form.grouped_fields %}
       <h3>{{category}}</h3>

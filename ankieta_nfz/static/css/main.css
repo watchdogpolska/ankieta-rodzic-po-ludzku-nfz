@@ -70,19 +70,13 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     height: 350px;
 }
 
-.header-top {
-    height: 130px;
-}
-.header-bottom {
-    border-top: 5px solid #FD0000;
-    height: 180px; /* 350 - 130 - 2*20*/
-    background: white;
-    padding: 20px;
-}
 .content{
     background: #F1F1EF;
 }
 .content .page-content{
+    position: relative;
+    top: -180px;
+    border-top: 5px solid #FD0000;
     padding: 20px;
     background: white;
 }
