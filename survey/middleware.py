@@ -1,4 +1,7 @@
-class ForceDefaultLanguageMiddleware(object):
+from django.utils.deprecation import MiddlewareMixin
+
+
+class ForceDefaultLanguageMiddleware(MiddlewareMixin, object):
     """
     Ignore Accept-Language HTTP headers
 
