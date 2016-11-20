@@ -101,7 +101,8 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     def preview(self, request, obj):
         context = {}
         context['opts'] = self.opts
-        context['original'] = context['title'] = obj
+        context['original'] = obj
+        context['title'] = self.preview.short_description
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         context['survey'] = context['survey'] = (Survey.objects.prefetch_full_content().
                                                  get(pk=obj.pk))
@@ -137,7 +138,8 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     def stats(self, request, obj):
         context = {}
         context['opts'] = self.opts
-        context['original'] = context['title'] = obj
+        context['original'] = obj
+        context['title'] = self.stats.short_description
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         context['survey'] = obj
         qs = Participant.objects.filter(survey=obj).with_progress_stats().all()
