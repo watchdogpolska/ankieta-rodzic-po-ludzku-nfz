@@ -66,7 +66,6 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Survey
     '''
-    actions = ['validate']
     change_actions = ['validate', 'export', 'preview', 'stats']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
@@ -84,16 +83,14 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         qs = super(SurveyAdmin, self).get_queryset(*args, **kwargs)
         return qs.prefetch_full_content().prefetch_related('participants')
 
-    @takes_instance_or_queryset
-    def validate(self, request, queryset):
+    def validate(self, request, obj):
         context = {}
         context['opts'] = self.opts
-        context['original'] = context['title'] = ", ".join(map(str, queryset))
+        context['original'] = obj
+        context['title'] = self.validate.short_description
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
-        log = []
-        for survey in queryset:
-            log.extend(survey.perform_audit())
-        context['log'] = log
+        context['object'] = obj
+        context['log'] = obj.perform_audit()
         return render(request, 'survey/survey_admin_validate.html', context=context)
     validate.short_description = _("Validate in detail")
     validate.label = _("Validate")
@@ -104,7 +101,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         context['original'] = obj
         context['title'] = self.preview.short_description
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
-        context['survey'] = context['survey'] = (Survey.objects.prefetch_full_content().
+        context['object'] = context['survey'] = (Survey.objects.prefetch_full_content().
                                                  get(pk=obj.pk))
         return render(request, 'survey/survey_admin_preview.html', context=context)
     preview.short_description = _("Preview a survey")
@@ -140,6 +137,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         context['opts'] = self.opts
         context['original'] = obj
         context['title'] = self.stats.short_description
+        context['object'] = obj
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         context['survey'] = obj
         qs = Participant.objects.filter(survey=obj).with_progress_stats().all()
@@ -258,7 +256,7 @@ class AnswerAdmin(VersionAdmin):
         Admin View for Answer
     '''
     list_display = ('answer', 'participant', 'subquestion', 'hospital')
-    list_filter = ('participant', 'subquestion', 'hospital',)
+    list_filter = ('participant', 'subquestion__question', 'subquestion', 'hospital',)
 
 
 admin.site.register(Answer, AnswerAdmin)

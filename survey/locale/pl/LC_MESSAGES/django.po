@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-20 18:42+0000\n"
-"PO-Revision-Date: 2016-11-20 19:42+0100\n"
+"POT-Creation-Date: 2016-11-20 22:30+0000\n"
+"PO-Revision-Date: 2016-11-20 23:31+0100\n"
 "Last-Translator: Adam Dobrawy <naczelnik@jawnosc.tk>\n"
 "Language-Team: \n"
 "Language: pl\n"
@@ -23,31 +23,63 @@ msgstr ""
 msgid "Is valid?"
 msgstr "Czy poprawna?"
 
-#: admin.py:97
+#: admin.py:95
 msgid "Validate in detail"
 msgstr "Weryfikuj szczegółowo"
 
-#: admin.py:98
+#: admin.py:96
 msgid "Validate"
 msgstr "Weryfikuj"
 
-#: admin.py:108
+#: admin.py:107
 msgid "Preview a survey"
 msgstr "Podejrzyj ankietę"
 
-#: admin.py:109
+#: admin.py:108
 msgid "Preview"
 msgstr "Podgląd"
 
-#: apps.py:7 models.py:124 models.py:160
+#: admin.py:149
+msgid "Statistics of progress of analysis"
+msgstr "Statystyki postępu analizy"
+
+#: admin.py:150
+msgid "Statistics"
+msgstr "Statystyki"
+
+#: admin.py:191
+msgid "Edit survey"
+msgstr "Edytuj ankietę"
+
+#: admin.py:192
+msgid "Edit a parent survey"
+msgstr "Edytuj nadrzędną ankietę"
+
+#: admin.py:220
+msgid "Edit category"
+msgstr "Edytuj ktegorię"
+
+#: admin.py:221
+msgid "Edit a parent category"
+msgstr "Edytuj nadrzędną kategorię"
+
+#: admin.py:247
+msgid "Edit question"
+msgstr "Edytuj pytanie"
+
+#: admin.py:248
+msgid "Edit a parent question"
+msgstr "Edytuj nadrzędne pytanie"
+
+#: apps.py:7 models.py:124 models.py:174
 msgid "Survey"
 msgstr "Ankieta"
 
-#: forms.py:110
+#: forms.py:111
 msgid "Answer confirmation"
 msgstr "Potwierdzenie odpowiedzi"
 
-#: models.py:27 models.py:66 models.py:161 models.py:182 models.py:208
+#: models.py:27 models.py:66 models.py:175 models.py:196 models.py:222
 msgid "Name"
 msgstr "Nazwa"
 
@@ -67,7 +99,7 @@ msgstr "Narodowy Fundusz Zdrowia"
 msgid "National Healt Funds"
 msgstr "Narodowe Fundusze Zdrowia"
 
-#: models.py:72 models.py:233
+#: models.py:72 models.py:247
 msgid "Hospital"
 msgstr "Szpital"
 
@@ -103,77 +135,97 @@ msgstr "Tekst zgłoszeniowy"
 msgid "Surveys"
 msgstr "Ankiety"
 
-#: models.py:141
+#: models.py:144
 msgid "Password"
 msgstr "Hasło"
 
-#: models.py:149 models.py:231
+#: models.py:163 models.py:245
 msgid "Participant"
 msgstr "Uczestnik"
 
-#: models.py:150
+#: models.py:164
 msgid "Participants"
 msgstr "Uczestnicy"
 
-#: models.py:162
+#: models.py:176
 msgid "Description"
 msgstr "Opis"
 
-#: models.py:163 models.py:183 models.py:209
+#: models.py:177 models.py:197 models.py:223
 msgid "Order"
 msgstr "Kolejnosć"
 
-#: models.py:167 models.py:181 templates/survey/survey_admin_preview.html:6
+#: models.py:181 models.py:195 templates/survey/survey_admin_preview.html:7
 msgid "Category"
 msgstr "Kategoria"
 
-#: models.py:168
+#: models.py:182
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models.py:187 models.py:207 templates/survey/survey_admin_preview.html:8
+#: models.py:201 models.py:221 templates/survey/survey_admin_preview.html:9
 msgid "Question"
 msgstr "Pytanie"
 
-#: models.py:188
+#: models.py:202
 msgid "Questions"
 msgstr "Pytania"
 
-#: models.py:210
+#: models.py:224
 msgid "Kind of answer"
 msgstr "Typ odpowiedzi"
 
-#: models.py:217 templates/survey/survey_admin_preview.html:10
+#: models.py:231 templates/survey/survey_admin_preview.html:11
 msgid "Subquestion"
 msgstr "Podpytanie"
 
-#: models.py:218 models.py:232
+#: models.py:232 models.py:246
 msgid "Subquestions"
 msgstr "Podpytania"
 
-#: models.py:234 models.py:238
+#: models.py:248 models.py:252
 msgid "Answer"
 msgstr "Odpowiedź"
 
-#: models.py:239
+#: models.py:253
 msgid "Answers"
 msgstr "Odpowiedzi"
 
-#: templates/survey/hospital_form.html:27
+#: templates/survey/hospital_form.html:34
 msgid "Save answer"
 msgstr "Zapisz odpowiedzi"
 
-#: templates/survey/hospital_list.html:15
+#: templates/survey/hospital_list.html:33
 msgid "Print"
 msgstr "Drukuj"
 
-#: templates/survey/survey_admin_preview.html:6
-#: templates/survey/survey_admin_preview.html:8
-#: templates/survey/survey_admin_preview.html:10
+#: templates/survey/survey_admin_base.html:5
+msgid "Home"
+msgstr "Początek"
+
+#: templates/survey/survey_admin_preview.html:7
+#: templates/survey/survey_admin_preview.html:9
+#: templates/survey/survey_admin_preview.html:11
 msgid "Edit"
 msgstr "Edytuj"
 
-#: views.py:105
+#: templates/survey/survey_admin_stats.html:32
+msgid "Health fund"
+msgstr "Narodowy Fundusz Zdrowia"
+
+#: templates/survey/survey_admin_stats.html:33
+msgid "Progress"
+msgstr "Postęp"
+
+#: templates/survey/survey_admin_stats.html:34
+msgid "Action"
+msgstr "Akcja"
+
+#: templates/survey/survey_admin_stats.html:45
+msgid "View"
+msgstr "Zobacz"
+
+#: views.py:111
 #, python-brace-format
 msgid "Answer for {hospital} was saved!"
 msgstr "Odpowiedź dla {hospital} została zapisana!"

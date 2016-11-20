@@ -18,11 +18,16 @@ SurveyHospitalForm = namedtuple('SurveyHospitalForm', ['hospital', 'form'])
 class HospitalMixin(object):
     model = Hospital
 
+    @cached_property
+    def participant(self):
+        return get_object_or_404(Participant.objects.with_survey(),
+                                 password=self.kwargs['password'],
+                                 pk=self.kwargs['participant'])
+
     def get_queryset(self, *args, **kwargs):
         qs = super(HospitalMixin, self).get_queryset(*args, **kwargs)
-        qs = qs.filter(health_fund__participant__password=self.kwargs['password'],
-                       health_fund__participant=self.kwargs['participant']).all()
-        qs = qs.answer_fetch(self.kwargs['participant'])
+        qs = qs.filter(health_fund__participant=self.participant).all()
+        qs = qs.answer_fetch(self.participant)
         return qs
 
 
@@ -38,6 +43,8 @@ class HospitalListView(HospitalMixin, ListView):
         context = super(HospitalListView, self).get_context_data(**kwargs)
         context['linked_hospitals'] = self.object_list.linked(**self.kwargs)
         context['print_url'] = self.get_print_url()
+        context['participant'] = self.participant
+        context['survey'] = self.participant.survey
         return context
 
 
@@ -45,12 +52,6 @@ class SurveyPrintView(HospitalListView):
     template_name = 'survey/survey_print.html'
     form_class = SurveyForm
     model = Hospital
-
-    @cached_property
-    def participant(self):
-        return get_object_or_404(Participant.objects.with_survey(),
-                                 password=self.kwargs['password'],
-                                 pk=self.kwargs['participant'])
 
     def get_form(self, hospital):
         return self.form_class(hospital=hospital,
@@ -91,10 +92,15 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
         kw['user'] = self.request.user
         return kw
 
+    def get_survey_list_url(self):
+        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
     def get_context_data(self, **kwargs):
         context = super(HospitalSurveyView, self).get_context_data(**kwargs)
         context['survey'] = self.survey
         context['hospital'] = self.hospital
+        context['survey_list_url'] = self.get_survey_list_url()
         return context
 
     def get_success_url(self):
@@ -107,3 +113,4 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         form.save()
         return super(HospitalSurveyView, self).form_valid(form, *args, **kwargs)
+
