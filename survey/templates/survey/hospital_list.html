@@ -1,5 +1,10 @@
 {% extends 'survey/base.html' %}
 {% load i18n %}
+{% block headerbottom%}
+<h1>{{survey}}</h1>
+{{ survey.welcome_text | safe }}
+{% endblock headerbottom %}
+
 {% block content %}
 <ul>
 {% for object, link, status in linked_hospitals %}

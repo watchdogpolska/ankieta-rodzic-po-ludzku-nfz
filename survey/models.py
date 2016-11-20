@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+from tinymce.models import HTMLField
 
 LogEntry = namedtuple('LogEntry', ['status', 'text'])
 LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
@@ -38,6 +39,7 @@ class NationalHealtFund(TimeStampedModel):
 
 
 class HospitalQuerySet(models.QuerySet):
+
     def answer_fetch(self, participant):
         prefetch = models.Prefetch(lookup='answer_set',
                                    to_attr='answer_participant',
@@ -85,9 +87,10 @@ class SurveyQuerySet(models.QuerySet):
 class Survey(TimeStampedModel):
     title = models.CharField(verbose_name=_("Title"), max_length=250)
     slug = AutoSlugField(populate_from='title', verbose_name=_("Slug"), unique=True)
-    welcome_text = models.TextField(verbose_name=_("Welcome text"), blank=True)
-    end_text = models.TextField(verbose_name=_("End text"), blank=True)
-    submit_text = models.TextField(verbose_name=_("Submit text"), blank=True)
+    welcome_text = HTMLField(verbose_name=_("Welcome text"), blank=True)
+    instruction = HTMLField(verbose_name=_("Instruction"), blank=True)
+    end_text = HTMLField(verbose_name=_("End text"), blank=True)
+    submit_text = HTMLField(verbose_name=_("Submit text"), blank=True)
     participants = models.ManyToManyField(NationalHealtFund, through="Participant")
     objects = SurveyQuerySet.as_manager()
 
@@ -127,6 +130,7 @@ class Survey(TimeStampedModel):
 
 
 class ParticipantQuerySet(models.QuerySet):
+
     def with_survey(self):
         return self.prefetch_related('survey__category_set__question_set__subquestion_set')
 

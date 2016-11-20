@@ -29,5 +29,8 @@ pytz==2016.7
 
 # Django admin
 django-object-actions==0.8.2
+django-tinymce==2.4.0
+
+# Logging
 django-request==1.5.1
 django-reversion==2.0.7

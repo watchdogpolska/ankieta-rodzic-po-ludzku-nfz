@@ -22,7 +22,7 @@ class SurveyForm(forms.Form):
 
         answer_qs = Answer.objects.filter(participant=self.participant,
                                           hospital=self.hospital).all()
-        self.initial = {x.subquestion_id: x.answer for x in answer_qs}
+        self.initial_sq = {x.subquestion_id: x.answer for x in answer_qs}
 
         super(SurveyForm, self).__init__(*args, **kwargs)
         for category in self.survey.category_set.all():
@@ -35,13 +35,13 @@ class SurveyForm(forms.Form):
     def get_field(self, subquestion):
         if subquestion.kind == Subquestion.KIND_INT:
             return forms.IntegerField(label=subquestion.name,
-                                      initial=self.initial.get(subquestion.pk, ''))
+                                      initial=self.initial_sq.get(subquestion.pk, ''))
         if subquestion.kind == Subquestion.KIND_TEXT:
             return forms.CharField(label=subquestion.name,
-                                   initial=self.initial.get(subquestion.pk, ''))
+                                   initial=self.initial_sq.get(subquestion.pk, ''))
         if subquestion.kind == Subquestion.KIND_LTEXT:
             return forms.CharField(label=subquestion.name,
-                                   initial=self.initial.get(subquestion.pk, ''),
+                                   initial=self.initial_sq.get(subquestion.pk, ''),
                                    widget=forms.widgets.Textarea())
 
     def get_key(self, subquestion):

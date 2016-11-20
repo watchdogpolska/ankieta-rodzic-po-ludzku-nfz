@@ -1,8 +1,8 @@
 {% extends 'survey/base.html' %}
-
+{% load i18n %}
 {% block headerbottom%}
-<h1>Ankieta NFZ</h1>
-{{ survey.welcome_text }}
+<h1>{{survey}}</h1>
+{{ survey.instruction | safe }}
 {% endblock headerbottom %}
 
 {% block content %}
@@ -21,10 +21,10 @@
       {% endfor %}
   {% endfor %}
   <div>
-    {{ survey.end_text }}
+    {{ survey.end_text | safe }}
   </div>
   <div>
-    <button type="submit" class="btn-brand">Zapisz dane</button>
+    <button type="submit" class="btn-brand">{% trans 'Save answer' %}</button>
   </div>
 </form>
 {% endblock %}

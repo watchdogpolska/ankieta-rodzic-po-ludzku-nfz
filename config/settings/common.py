@@ -41,6 +41,7 @@ THIRD_PARTY_APPS = (
     'django_object_actions',
     'request',
     'reversion',
+    'tinymce'
 )
 
 # Apps specific for this project go here.
@@ -235,3 +236,10 @@ ADMIN_URL = r'^admin/'
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
 AUTH_USER_MODEL = 'users.User'
+
+TINYMCE_DEFAULT_CONFIG = {
+    'plugins': "table,spellchecker,paste,searchreplace",
+    'theme': "advanced",
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 10,
+}
