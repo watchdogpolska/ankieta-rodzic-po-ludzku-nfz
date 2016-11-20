@@ -10,16 +10,19 @@ from .models import Subquestion
 
 
 class NationalHealtFundFactoryTestCase(TestCase):
+
     def test_build(self):
         NationalHealtFundFactory()
 
 
 class HospitalFactoryTestCase(TestCase):
+
     def test_build(self):
         HospitalFactory()
 
 
 class SurveyFactoryTestCase(TestCase):
+
     def test_build(self):
         SurveyFactory()
 
@@ -28,26 +31,31 @@ class SurveyFactoryTestCase(TestCase):
 
 
 class CategoryFactoryTestCase(TestCase):
+
     def test_build(self):
         CategoryFactory()
 
 
 class ParticipantFactoryTestCase(TestCase):
+
     def test_build(self):
         ParticipantFactory()
 
 
 class QuestionFactoryTestCase(TestCase):
+
     def test_build(self):
         QuestionFactory()
 
 
 class SubquestionFactoryTestCase(TestCase):
+
     def test_build(self):
         SubquestionFactory()
 
 
 class AnswerFactoryTestCase(TestCase):
+
     def test_build(self):
         AnswerFactory()
 
@@ -58,6 +66,7 @@ class AnswerFactoryTestCase(TestCase):
 
 
 class QuestionFormTestCase(TestCase):
+
     def setUp(self):
         self.question = QuestionFactory()
         self.subquestions = SubquestionFactory.create_batch(size=5, question=self.question)
@@ -143,3 +152,13 @@ class QuestionFormTestCase(TestCase):
                           hospital=self.hospital,
                           user=UserFactory())
         self.assertEqual(form.is_valid(), False)
+
+    def test_support_initial(self):
+        answer = AnswerFactory(answer="Unique-answer-content",
+                               subquestion=self.subquestions[0],
+                               participant=self.participant,
+                               hospital=self.hospital)
+        form = SurveyForm(participant=self.participant,
+                          hospital=self.hospital,
+                          user=UserFactory())
+        self.assertIn(answer.answer, form.as_p())
