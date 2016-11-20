@@ -1,0 +1,17 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n %}
+{% block content %}
+<ul>
+{% for category in survey.category_set.all %}
+    <li>{% trans 'Category' %}: {{category}} [<a href="{% url 'admin:survey_category_change' category.id %}">{% trans 'Edit' %}</a>]<ul>
+    {% for question in category.question_set.all %}
+        <li>{% trans 'Question' %}: {{question}} [<a href="{% url 'admin:survey_question_change' category.id %}">{% trans 'Edit' %}</a>] <ul>
+        {% for subquestion in question.subquestion_set.all %}
+            <li>{% trans 'Subquestion' %}: {{subquestion}} ({{subquestion.get_kind_display}})  [<a href="{% url 'admin:survey_subquestion_change' category.id %}">{% trans 'Edit' %}</a>]</li>
+        {% endfor %}
+        </ul></li>
+    {% endfor %}
+    </ul></li>
+{% endfor %}
+</ul>
+{% endblock %}

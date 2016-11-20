@@ -13,6 +13,7 @@ Group = namedtuple('Group', ['obj', 'set'])
 
 
 class SurveyForm(forms.Form):
+
     def __init__(self, *args, **kwargs):
         self.participant = kwargs.pop('participant')
         self.hospital = kwargs.pop('hospital')

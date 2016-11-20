@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-20 16:58+0000\n"
-"PO-Revision-Date: 2016-11-20 17:59+0100\n"
+"POT-Creation-Date: 2016-11-20 18:42+0000\n"
+"PO-Revision-Date: 2016-11-20 19:42+0100\n"
 "Last-Translator: Adam Dobrawy <naczelnik@jawnosc.tk>\n"
 "Language-Team: \n"
 "Language: pl\n"
@@ -30,6 +30,14 @@ msgstr "Weryfikuj szczegółowo"
 #: admin.py:98
 msgid "Validate"
 msgstr "Weryfikuj"
+
+#: admin.py:108
+msgid "Preview a survey"
+msgstr "Podejrzyj ankietę"
+
+#: admin.py:109
+msgid "Preview"
+msgstr "Podgląd"
 
 #: apps.py:7 models.py:124 models.py:160
 msgid "Survey"
@@ -115,7 +123,7 @@ msgstr "Opis"
 msgid "Order"
 msgstr "Kolejnosć"
 
-#: models.py:167 models.py:181
+#: models.py:167 models.py:181 templates/survey/survey_admin_preview.html:6
 msgid "Category"
 msgstr "Kategoria"
 
@@ -123,7 +131,7 @@ msgstr "Kategoria"
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models.py:187 models.py:207
+#: models.py:187 models.py:207 templates/survey/survey_admin_preview.html:8
 msgid "Question"
 msgstr "Pytanie"
 
@@ -135,7 +143,7 @@ msgstr "Pytania"
 msgid "Kind of answer"
 msgstr "Typ odpowiedzi"
 
-#: models.py:217
+#: models.py:217 templates/survey/survey_admin_preview.html:10
 msgid "Subquestion"
 msgstr "Podpytanie"
 
@@ -158,6 +166,12 @@ msgstr "Zapisz odpowiedzi"
 #: templates/survey/hospital_list.html:15
 msgid "Print"
 msgstr "Drukuj"
+
+#: templates/survey/survey_admin_preview.html:6
+#: templates/survey/survey_admin_preview.html:8
+#: templates/survey/survey_admin_preview.html:10
+msgid "Edit"
+msgstr "Edytuj"
 
 #: views.py:105
 #, python-brace-format

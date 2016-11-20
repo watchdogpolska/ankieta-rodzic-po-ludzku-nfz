@@ -3,6 +3,7 @@ from . import models
 
 
 class NationalHealtFundFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.NationalHealtFund
 
@@ -12,6 +13,7 @@ class NationalHealtFundFactory(factory.django.DjangoModelFactory):
 
 
 class HospitalFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Hospital
 
@@ -22,6 +24,7 @@ class HospitalFactory(factory.django.DjangoModelFactory):
 
 
 class SurveyFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Survey
 
@@ -53,6 +56,7 @@ class CategoryFactory(factory.django.DjangoModelFactory):
 
 
 class ParticipantFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Participant
 
@@ -61,6 +65,7 @@ class ParticipantFactory(factory.django.DjangoModelFactory):
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Question
 
@@ -69,6 +74,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
 
 
 class SubquestionFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Subquestion
 
@@ -77,6 +83,7 @@ class SubquestionFactory(factory.django.DjangoModelFactory):
 
 
 class AnswerFactory(factory.django.DjangoModelFactory):
+
     class Meta:
         model = models.Answer
     participant = factory.SubFactory(ParticipantFactory,
