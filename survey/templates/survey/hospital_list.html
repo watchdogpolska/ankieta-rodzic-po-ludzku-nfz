@@ -6,10 +6,28 @@
 {% endblock headerbottom %}
 
 {% block content %}
-<ul>
-{% for object, link, status in linked_hospitals %}
-    <li><a href="{{link}}">{{object}}</a> {{status}}</li>
-{% endfor %}
+<table class="table">
+  <thead>
+    <th>Obiekt</th>
+    <th>Status</th>
+  </thead>
+  <tbody>
+  {% for object, link, status in linked_hospitals %}
+    <tr>
+      <td>
+        <a href="{{link}}">{{object}}</a>
+      </td>
+      <td>
+        {% if status %}
+          <i class="fa fa-thumbs-up" aria-hidden="true"></i> Zapisano wyniki
+        {% else %}
+          <i class="fa fa-hourglass" aria-hidden="true"></i> Oczekuje na przesłanie danych
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
 </ul>
 
 <a href="{{print_url}}" class="btn-brand">{% trans 'Print' %}</a>

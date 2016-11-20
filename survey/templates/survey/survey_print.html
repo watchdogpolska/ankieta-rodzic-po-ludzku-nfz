@@ -1,10 +1,101 @@
-{% extends 'base.html' %}
+{% load staticfiles i18n %}<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="">
+<!--<![endif]-->
 
-{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title></title>
+    <meta name="description" content="">
+    <link rel="stylesheet" href="{% static 'css/normalize.min.css' %}">x
+    <style type="text/css">
+@media print {
+    *,
+    *:before,
+    *:after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
 
-{% for hospital, form in hospital_forms %}
-    <h1>{{hospital}}</h1>
-    {% include 'survey/_form_print.html' with form=form %}
-{% endfor %}
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
 
-{% endblock %}
+/*    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }*/
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
+    </style>
+</head>
+
+<body>
+  {% for hospital, form in hospital_forms %}
+      <a href="http://rodzicpoludzku.pl/">
+          <img src="{% static 'img/logo.png' %}" alt="" height="130" class="header-logo">
+      </a>
+      <h1>{{hospital}}</h1>
+      {% for category, question_set in form.grouped_fields %}
+          <h2>{{category}}</h2>
+          {% for question, subquestion_set in question_set %}
+              <h3>{{question}}</h3>
+              {% for subquestion, field in subquestion_set %}
+                  <div>
+                  {{ field.label }}: [{{field.initial}}]
+                  </div>
+              {% endfor %}
+          {% endfor %}
+      {% endfor %}
+  {% endfor %}
+  <script type="text/javascript">
+    window.print();
+  </script>
+</body>
+
+</html>

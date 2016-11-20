@@ -94,7 +94,14 @@ h1, h2, h3, h4, h5, h6{
     font-size: 1.8em;
     background: white;
 }
-
+h1 small,
+h2 small,
+h3 small,
+h4 small,
+h5 small,
+h6 small {
+  color: #4f71b1;
+}
 h2{
     font-size: 1.7em;
 }
@@ -174,14 +181,65 @@ table td.triple-column {
   text-transform: uppercase;
   box-shadow: 5px 5px 8px 2px #C8CBDF;
   text-decoration: none;
+  display: inline-block;
 }
 .btn-brand:hover, .btn-brand:active, .btn-brand:focus {
   background: -webkit-linear-gradient(93deg, #a8b0c7 30%, white 80%);
   background: linear-gradient(-3deg, #a8b0c7 30%, white 80%);
 }
 
+table.table {
+  width: 100%;
+  border: none;
+  border: 2px solid #bed5ec;
+  margin-bottom: 1em;
+}
 
+table.table th, table.table td {
+  border: none;
+}
 
+table.table thead th{
+  background: #bed5ec;
+  padding: 5px;
+  font-weight: normal;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+table.table tbody td{
+  padding: 5px;
+  border-top: 2px solid #bed5ec;
+}
+.form-group:before,
+.form-group:after {
+    content: " ";
+    display: table;
+}
+
+.form-group:after {
+    clear: both;
+}
+
+.form-group {
+    *zoom: 1;
+    margin-bottom: 16px;
+}
+.form-group-label, .form-group-input{
+  float: left;
+}
+.form-group-label{
+  width: 50%
+}
+
+.form-group-input{
+  width: 50%
+}
+.form-group-input select,
+.form-group-input input {
+  width: 98%;
+}
 
 /* ==========================================================================
    Media Queries
