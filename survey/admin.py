@@ -3,8 +3,9 @@ from itertools import groupby
 
 from django.contrib import admin
 from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils.translation import ugettext_lazy as _
 from django_object_actions import (DjangoObjectActions,
                                    takes_instance_or_queryset)
@@ -66,7 +67,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         Admin View for Survey
     '''
     actions = ['validate']
-    change_actions = ['validate', 'export', 'preview']
+    change_actions = ['validate', 'export', 'preview', 'stats']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
         CategoryInline,
@@ -133,6 +134,21 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
             writer.writerow(row)
         return response
 
+    def stats(self, request, obj):
+        context = {}
+        context['opts'] = self.opts
+        context['original'] = context['title'] = obj
+        context['has_change_permission'] = request.user.has_perm('survey.change_survey')
+        context['survey'] = obj
+        qs = Participant.objects.filter(survey=obj).with_progress_stats().all()
+        context['participant_list'] = qs
+        context['sum_fill_count'] = sum(x.fill_count() for x in qs)
+        context['sum_required_count'] = sum(x.required_count() for x in qs)
+        context['sum_progress'] = context['sum_fill_count'] / context['sum_required_count'] * 100
+        return render(request, 'survey/survey_admin_stats.html', context=context)
+    stats.short_description = _("Statistics of progress of analysis")
+    stats.label = _("Statistics")
+
 
 admin.site.register(Survey, SurveyAdmin)
 
@@ -158,7 +174,7 @@ class QuestionInline(admin.TabularInline):
     model = Question
 
 
-class CategoryAdmin(VersionAdmin):
+class CategoryAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Category
     '''
@@ -168,6 +184,12 @@ class CategoryAdmin(VersionAdmin):
     inlines = [
         QuestionInline
     ]
+    change_actions = ['parent_edit']
+
+    def parent_edit(self, request, obj):
+        return reverse('admin:survey_survey_change', args=[obj.survey_id])
+    parent_edit.short_description = _("Edit survey")
+    parent_edit.label = _("Edit a parent survey")
 
 
 admin.site.register(Category, CategoryAdmin)
@@ -180,7 +202,7 @@ class SubquestionInline(admin.TabularInline):
     model = Subquestion
 
 
-class QuestionAdmin(VersionAdmin):
+class QuestionAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Question
     '''
@@ -190,6 +212,13 @@ class QuestionAdmin(VersionAdmin):
         SubquestionInline,
     ]
     search_fields = ('name',)
+
+    change_actions = ['parent_edit']
+
+    def parent_edit(self, request, obj):
+        return reverse('admin:survey_category_change', args=[obj.category_id])
+    parent_edit.short_description = _("Edit category")
+    parent_edit.label = _("Edit a parent category")
 
 
 admin.site.register(Question, QuestionAdmin)
@@ -202,7 +231,7 @@ class AnswerInline(admin.TabularInline):
     model = Answer
 
 
-class SubquestionAdmin(VersionAdmin):
+class SubquestionAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Subquestion
     '''
@@ -211,6 +240,12 @@ class SubquestionAdmin(VersionAdmin):
     inlines = [
         AnswerInline,
     ]
+    change_actions = ['parent_edit']
+
+    def parent_edit(self, request, obj):
+        return redirect('admin:survey_question_change', args=[obj.question_id])
+    parent_edit.short_description = _("Edit question")
+    parent_edit.label = _("Edit a parent question")
 
 
 admin.site.register(Subquestion, SubquestionAdmin)

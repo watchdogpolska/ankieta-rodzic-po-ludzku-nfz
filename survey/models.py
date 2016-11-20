@@ -134,12 +134,26 @@ class ParticipantQuerySet(models.QuerySet):
     def with_survey(self):
         return self.prefetch_related('survey__category_set__question_set__subquestion_set')
 
+    def with_progress_stats(self):
+        return self.prefetch_related('answer_set', 'health_fund__hospital_set')
+
 
 class Participant(TimeStampedModel):
     health_fund = models.ForeignKey(NationalHealtFund, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
     objects = ParticipantQuerySet.as_manager()
+
+    def fill_count(self):
+        return len({x.hospital_id for x in self.answer_set.all()})
+
+    def required_count(self):
+        if hasattr(self.health_fund, 'hospital_count'):
+            return self.health_fund.hospital_count
+        return len(self.health_fund.hospital_set.all())
+
+    def progress(self):
+        return self.fill_count() / self.required_count() * 100
 
     def get_absolute_url(self, *args, **kwargs):
         return reverse('survey:list', kwargs={'participant': str(self.id),

@@ -13,7 +13,6 @@ urlpatterns = [
     url(settings.ADMIN_URL, admin.site.urls),
 
     # User management
-    url(r'^users/', include('ankieta_nfz.users.urls', namespace='users')),
     url(r'^tinymce/', include('tinymce.urls')),
     # Your stuff: custom urls includes go here
 

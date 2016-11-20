@@ -1,0 +1,59 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n %}
+{% block content %}
+<style>
+.bar {
+  position: relative;
+  height: 16px; 
+  height: 1em; 
+  border: 1px solid black; 
+  border-radius: 10px; 
+  overflow: hidden; 
+  background: white;
+}
+.bar > div{
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: green; 
+  height: 16px; 
+  height: 16px;
+  z-index: 4;
+  text-align: center;
+  font-size: .7em;
+  line-height: 16px;
+  color: #000;
+}
+</style>
+<table id='result_list'>
+<thead>
+    <tr>
+        <th>{% trans 'Health fund' %}</th>
+        <th>{% trans 'Progress' %}</th>
+        <th>{% trans 'Action' %}</th>
+    </tr>
+</thead>
+{% for participant in participant_list %}
+    <tr>
+        <td>{{participant.health_fund}}</td>
+        <td>
+        <div class="bar">
+            <div style="width: {{participant.progress |floatformat:"0"}}%; ">{{participant.fill_count}} / {{participant.required_count}}</div>
+        </div>
+        </td>
+        <td><a href="{{participant.get_absolute_url}}">{% trans 'View' %}</a></td>
+    </tr>
+{% endfor %}
+<tfooter>
+    <tr>
+        <th>&nbsp;</th>
+        <th>
+        <div class="bar">
+            <div style="width: {{sum_progress |floatformat:"0"}}%; ">{{ sum_fill_count }} / {{ sum_required_count }}</div>
+        </div>
+        </th>
+        <th>&nbsp;</th>
+    </tr>
+</tfooter>
+</table>
+{% endblock %}
