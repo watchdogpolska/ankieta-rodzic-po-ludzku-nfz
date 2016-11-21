@@ -34,3 +34,6 @@ django-tinymce==2.4.0
 # Logging
 django-request==1.5.1
 django-reversion==2.0.7
+
+sphinx-rtd-theme==0.1.9
+

@@ -24,9 +24,12 @@ class NationalHealtFundQuerySet(models.QuerySet):
 
 @python_2_unicode_compatible
 class NationalHealtFund(TimeStampedModel):
-    name = models.CharField(verbose_name=_("Name"), max_length=50)
-    email = models.EmailField(verbose_name=_("E-mail"), blank=True)
-    identifier = models.CharField(verbose_name=_("Identifier"), max_length=15)
+    name = models.CharField(verbose_name=_("Name"), max_length=50, help_text=_("Branch name"))
+    email = models.EmailField(verbose_name=_("E-mail"),
+                              help_text=_("E-mail to a branch of the national health fund"))
+    identifier = models.CharField(verbose_name=_("Identifier"),
+                                  max_length=15,
+                                  help_text=_("ID data to an external computer system"))
     objects = NationalHealtFundQuerySet.as_manager()
 
     class Meta:

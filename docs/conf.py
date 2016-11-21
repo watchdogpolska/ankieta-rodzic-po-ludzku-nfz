@@ -17,10 +17,19 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import inspect
+import os
+import sys
 
+import django
+from django.utils.encoding import force_text
+from django.utils.html import strip_tags
+
+sys.path.insert(0, os.path.abspath('..'))
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')
+django.setup()
+# settings.configure(INSTALLED_APPS=['survey', ])
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -124,7 +133,14 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+try:
+    import sphinx_rtd_theme
+
+    html_theme = "sphinx_rtd_theme"
+
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+except ImportError:
+    html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -243,21 +259,21 @@ htmlhelp_basename = 'ankieta-rodzic-po-ludzku-nfzdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-     # The paper size ('letterpaper' or 'a4paper').
-     #
-     # 'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    # 'papersize': 'letterpaper',
 
-     # The font size ('10pt', '11pt' or '12pt').
-     #
-     # 'pointsize': '10pt',
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
 
-     # Additional stuff for the LaTeX preamble.
-     #
-     # 'preamble': '',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
 
-     # Latex figure (float) alignment
-     #
-     # 'figure_align': 'htbp',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -290,7 +306,7 @@ latex_documents = [
 #
 # latex_appendices = []
 
-# It false, will not define \strong, \code, 	itleref, \crossref ... but only
+# It false, will not define \strong, \code,     itleref, \crossref ... but only
 # \sphinxstrong, ..., \sphinxtitleref, ... To help avoid clash with user added
 # packages.
 #
@@ -341,3 +357,42 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
+
+
+def process_docstring(app, what, name, obj, options, lines):
+    # This causes import errors if left outside the function
+    from django.db import models
+
+    # Only look at objects that inherit from Django's base model class
+    if inspect.isclass(obj) and issubclass(obj, models.Model):
+        # Grab the field list from the meta class
+        fields = obj._meta.fields
+
+        for field in fields:
+            # Decode and strip any html out of the field's help text
+            help_text = strip_tags(force_text(field.help_text))
+
+            # Decode and capitalize the verbose name, for use if there isn't
+            # any help text
+            verbose_name = force_text(field.verbose_name).capitalize()
+
+            if help_text:
+                # Add the model field to the end of the docstring as a param
+                # using the help text as the description
+                lines.append(u':param %s: %s' % (field.attname, help_text))
+            else:
+                # Add the model field to the end of the docstring as a param
+                # using the verbose name as the description
+                lines.append(u':param %s: %s' % (field.attname, verbose_name))
+
+            # Add the field's type to the docstring
+            lines.append(u':type %s: %s' % (field.attname, type(field).__name__))
+        lines.append(u':param _meta.verbose_name: %s' % (obj._meta.verbose_name, ))
+        lines.append(u':param _meta.verbose_name_plural: %s' % (obj._meta.verbose_name_plural, ))
+    # Return the extended docstring
+    return lines
+
+
+def setup(app):
+    # Register the docstring processor with sphinx
+    app.connect('autodoc-process-docstring', process_docstring)
