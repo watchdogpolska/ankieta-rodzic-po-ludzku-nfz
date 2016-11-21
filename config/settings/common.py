@@ -41,7 +41,8 @@ THIRD_PARTY_APPS = (
     'django_object_actions',
     'request',
     'reversion',
-    'tinymce'
+    'tinymce',
+    'import_export',
 )
 
 # Apps specific for this project go here.
@@ -107,7 +108,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': env.db('DATABASE_URL', default='mysql:///ankieta_nfz'),
 }
-DATABASES['default']['ATOMIC_REQUESTS'] = True
+# DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 
 # GENERAL CONFIGURATION

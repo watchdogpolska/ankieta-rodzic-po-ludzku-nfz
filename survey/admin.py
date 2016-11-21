@@ -7,10 +7,10 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import ugettext_lazy as _
-from django_object_actions import (DjangoObjectActions,
-                                   takes_instance_or_queryset)
+from django_object_actions import (DjangoObjectActions)
 from reversion.admin import VersionAdmin
-
+from import_export.admin import ImportExportMixin
+from .resources import ParticipantResource, NationalHealthFundResource, HospitalResource
 from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
 
@@ -22,10 +22,11 @@ class ParticipantInline(admin.TabularInline):
     model = Participant
 
 
-class HospitalAdmin(VersionAdmin):
+class HospitalAdmin(ImportExportMixin, VersionAdmin):
     '''
         Admin View for Hospital
     '''
+    resource_class = HospitalResource
     list_display = ('name', 'email', 'health_fund', 'identifier', 'created', 'modified')
     search_fields = ('name', 'email', 'identifier')
 
@@ -40,10 +41,15 @@ class HospitalInline(admin.TabularInline):
     model = Hospital
 
 
-class NationalHealtFundAdmin(VersionAdmin):
+class NationalHealtFundAdmin(ImportExportMixin, VersionAdmin):
     '''
         Admin View for NationalHealtFund
     '''
+    inlines = [
+        HospitalInline,
+        ParticipantInline,
+    ]
+    resource_class = NationalHealthFundResource
     list_display = ('name',)
     search_fields = ('name',)
     inlines = [
@@ -156,7 +162,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
 admin.site.register(Survey, SurveyAdmin)
 
 
-class ParticipantAdmin(VersionAdmin):
+class ParticipantAdmin(ImportExportMixin, VersionAdmin):
     '''
         Admin View for Participant
     '''
@@ -169,6 +175,7 @@ class ParticipantAdmin(VersionAdmin):
     solve_url.short_description = _("Solve url")
     list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url')
     list_filter = ('survey', 'health_fund')
+    resource_class = ParticipantResource
 
 
 admin.site.register(Participant, ParticipantAdmin)

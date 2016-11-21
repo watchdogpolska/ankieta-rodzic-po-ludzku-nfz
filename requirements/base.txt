@@ -30,6 +30,7 @@ pytz==2016.7
 # Django admin
 django-object-actions==0.8.2
 django-tinymce==2.4.0
+django-import-export==0.5.1
 
 # Logging
 django-request==1.5.1
