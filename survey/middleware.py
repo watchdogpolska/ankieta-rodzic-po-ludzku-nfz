@@ -15,3 +15,12 @@ class ForceDefaultLanguageMiddleware(MiddlewareMixin, object):
     def process_request(self, request):
         if 'HTTP_ACCEPT_LANGUAGE' in request.META:
             del request.META['HTTP_ACCEPT_LANGUAGE']
+
+
+class XForwardedForMiddleware(MiddlewareMixin, object):
+
+    def process_request(self, request):
+        if "HTTP_X_FORWARDED_FOR" in request.META and not request.META.get("REMOTE_ADDR", False):
+            request.META["HTTP_X_PROXY_REMOTE_ADDR"] = request.META["REMOTE_ADDR"]
+            parts = request.META["HTTP_X_FORWARDED_FOR"].split(",", 1)
+            request.META["REMOTE_ADDR"] = parts[0]
