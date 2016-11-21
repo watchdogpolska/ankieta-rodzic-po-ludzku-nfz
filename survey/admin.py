@@ -158,9 +158,13 @@ class ParticipantAdmin(VersionAdmin):
         Admin View for Participant
     '''
 
-    def get_url(self, obj):
-        return 'http://%s%s' % (Site.objects.get_current().domain, obj.get_absolute_url())
-    list_display = ('pk', 'survey', 'health_fund', 'password', 'get_url')
+    def solve_url(self, obj):
+        url = 'http://%s%s' % (
+            Site.objects.get_current().domain, obj.get_absolute_url())
+        return '<a href="%s">%s</a>' % (url, url)
+    solve_url.allow_tags = True
+    solve_url.short_description = _("Solve url")
+    list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url')
     list_filter = ('survey', 'health_fund')
 
 

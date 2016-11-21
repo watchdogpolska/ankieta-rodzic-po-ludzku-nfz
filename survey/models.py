@@ -68,7 +68,11 @@ class Hospital(TimeStampedModel):
     health_fund = models.ForeignKey(NationalHealtFund, verbose_name=_("National Healt Fund"))
     name = models.CharField(verbose_name=_("Name"), max_length=250)
     email = models.EmailField(verbose_name=_("E-mail"))
-    identifier = models.CharField(verbose_name=_("Identifier"), max_length=250)
+    identifier = models.CharField(
+        verbose_name=_("Identifier"),
+        help_text=_('The internal identifier used to connect foundation database'),
+        max_length=15,
+        blank=True)
     objects = HospitalQuerySet.as_manager()
 
     class Meta:
@@ -94,7 +98,7 @@ class Survey(TimeStampedModel):
     instruction = HTMLField(verbose_name=_("Instruction"), blank=True)
     end_text = HTMLField(verbose_name=_("End text"), blank=True)
     submit_text = HTMLField(verbose_name=_("Submit text"), blank=True)
-    participants = models.ManyToManyField(NationalHealtFund, through="Participant")
+    participants = models.ManyToManyField(NationalHealtFund, verbose_name=_("Participants"), through="Participant")
     objects = SurveyQuerySet.as_manager()
 
     def _count_msg(self, obj, attribute, found=None, missing=None):
@@ -142,8 +146,8 @@ class ParticipantQuerySet(models.QuerySet):
 
 
 class Participant(TimeStampedModel):
-    health_fund = models.ForeignKey(NationalHealtFund, on_delete=models.CASCADE)
-    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    health_fund = models.ForeignKey(NationalHealtFund, verbose_name=_("National Healt Fund"), on_delete=models.CASCADE)
+    survey = models.ForeignKey(Survey, verbose_name=_("Survey"), on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
     objects = ParticipantQuerySet.as_manager()
 
