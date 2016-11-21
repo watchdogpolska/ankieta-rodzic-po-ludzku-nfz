@@ -37,7 +37,7 @@ MIDDLEWARE = RAVEN_MIDDLEWARE + MIDDLEWARE
 # ------------------------------------------------------------------------------
 # Hosts/domain names that are valid for this site
 # See https://docs.djangoproject.com/en/1.6/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['nfz.rodzicpoludzku.pl'])
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['nfz.ankietypoloznicze.rodzicpoludzku.pl.'])
 # END SITE CONFIGURATION
 
 INSTALLED_APPS += ('gunicorn', )
@@ -46,7 +46,7 @@ INSTALLED_APPS += ('gunicorn', )
 # EMAIL
 # ------------------------------------------------------------------------------
 DEFAULT_FROM_EMAIL = env('DJANGO_DEFAULT_FROM_EMAIL',
-                         default='Ankieta NFZ <noreply@nfz.rodzicpoludzku.pl>')
+                         default='Ankieta NFZ <noreply@nfz.ankietypoloznicze.rodzicpoludzku.pl.>')
 EMAIL_SUBJECT_PREFIX = env('DJANGO_EMAIL_SUBJECT_PREFIX', default='[Ankieta NFZ] ')
 SERVER_EMAIL = env('DJANGO_SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 
