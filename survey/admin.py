@@ -201,7 +201,7 @@ class CategoryAdmin(DjangoObjectActions, VersionAdmin):
     change_actions = ['parent_edit']
 
     def parent_edit(self, request, obj):
-        return reverse('admin:survey_survey_change', args=[obj.survey_id])
+        return redirect(reverse('admin:survey_survey_change', args=[str(obj.survey_id)]))
     parent_edit.short_description = _("Edit survey")
     parent_edit.label = _("Edit a parent survey")
 
@@ -230,7 +230,7 @@ class QuestionAdmin(DjangoObjectActions, VersionAdmin):
     change_actions = ['parent_edit']
 
     def parent_edit(self, request, obj):
-        return reverse('admin:survey_category_change', args=[obj.category_id])
+        return redirect(reverse('admin:survey_category_change', args=[str(obj.category_id)]))
     parent_edit.short_description = _("Edit category")
     parent_edit.label = _("Edit a parent category")
 
@@ -257,7 +257,7 @@ class SubquestionAdmin(DjangoObjectActions, VersionAdmin):
     change_actions = ['parent_edit']
 
     def parent_edit(self, request, obj):
-        return redirect('admin:survey_question_change', args=[obj.question_id])
+        return redirect(reverse('admin:survey_question_change', args=[str(obj.question_id)]))
     parent_edit.short_description = _("Edit question")
     parent_edit.label = _("Edit a parent question")
 
