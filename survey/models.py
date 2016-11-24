@@ -5,6 +5,8 @@ from autoslug.fields import AutoSlugField
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import F, Count
+from django.db.models.functions import Cast
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -98,7 +100,9 @@ class Survey(TimeStampedModel):
     instruction = HTMLField(verbose_name=_("Instruction"), blank=True)
     end_text = HTMLField(verbose_name=_("End text"), blank=True)
     submit_text = HTMLField(verbose_name=_("Submit text"), blank=True)
-    participants = models.ManyToManyField(NationalHealtFund, verbose_name=_("Participants"), through="Participant")
+    participants = models.ManyToManyField(NationalHealtFund,
+                                          verbose_name=_("Participants"),
+                                          through="Participant")
     objects = SurveyQuerySet.as_manager()
 
     def _count_msg(self, obj, attribute, found=None, missing=None):
@@ -142,25 +146,58 @@ class ParticipantQuerySet(models.QuerySet):
         return self.prefetch_related('survey__category_set__question_set__subquestion_set')
 
     def with_progress_stats(self):
-        return self.prefetch_related('answer_set', 'health_fund__hospital_set')
+        def fl(expr):
+            return Cast(expr, models.FloatField())
+        qs = self.annotate(answer_count=Count('answer', distinct=True))
+        qs = qs.annotate(subquestion_count=Count('survey__category__question__subquestion',
+                                                 distinct=True))
+        qs = qs.annotate(hospital_count=Count('health_fund__hospital', distinct=True))
+        up = F('answer_count')
+        down = F('subquestion_count') * F('hospital_count')
+        expr = (up / down) * 100
+        qs = qs.annotate(progress=expr)  # Due django casting bug available in Python as int only
+        return qs
 
 
 class Participant(TimeStampedModel):
-    health_fund = models.ForeignKey(NationalHealtFund, verbose_name=_("National Healt Fund"), on_delete=models.CASCADE)
+    health_fund = models.ForeignKey(NationalHealtFund,
+                                    verbose_name=_("National Healt Fund"),
+                                    on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, verbose_name=_("Survey"), on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
     objects = ParticipantQuerySet.as_manager()
 
-    def fill_count(self):
-        return len({x.hospital_id for x in self.answer_set.all()})
+    def get_answer_count(self):
+        if not hasattr(self, 'answer_count'):
+            try:
+                self._prefetched_objects_cache['answer']
+                self.answer_count = len(self.answer_set.all())
+            except (AttributeError, KeyError):
+                self.answer_count = self.answer_set.count()
+        return self.answer_count
 
-    def required_count(self):
-        if hasattr(self.health_fund, 'hospital_count'):
-            return self.health_fund.hospital_count
-        return len(self.health_fund.hospital_set.all())
+    def get_hospital_count(self):
+        if not hasattr(self, 'hospital_count'):
+            self.hospital_count = Hospital.objects.filter(health_fund=self.health_fund_id).count()
+        return self.hospital_count
 
-    def progress(self):
-        return self.fill_count() / self.required_count() * 100
+    def get_subquestion_count(self):
+        if not hasattr(self, 'subquestion_count'):
+            self.subquestion_count = (Subquestion.objects.
+                                      filter(question__category__survey__participant=self).
+                                      count())
+        return self.subquestion_count
+
+    def get_required_count(self):
+        return self.get_hospital_count() * self.get_subquestion_count()
+
+    def get_progress(self):
+        return self.get_answer_count() / self.get_required_count() * 100
+
+    def get_progress_display(self):
+        return "{0:d} / {1:d} = {2:.2f} %".format(self.get_answer_count(),
+                                                  self.get_required_count(),
+                                                  self.get_progress())
 
     def get_absolute_url(self, *args, **kwargs):
         return reverse('survey:list', kwargs={'participant': str(self.id),

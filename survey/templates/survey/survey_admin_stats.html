@@ -30,7 +30,7 @@
 <thead>
     <tr>
         <th>{% trans 'Health fund' %}</th>
-        <th>{% trans 'Progress' %}</th>
+        <th width="200px">{% trans 'Progress' %}</th>
         <th>{% trans 'Action' %}</th>
     </tr>
 </thead>
@@ -39,7 +39,7 @@
         <td>{{participant.health_fund}}</td>
         <td>
         <div class="bar">
-            <div style="width: {{participant.progress |floatformat:"0"}}%; ">{{participant.fill_count}} / {{participant.required_count}}</div>
+            <div style="width: {{participant.progress |floatformat:"0"}}%; ">{{participant.get_progress_display}}</div>
         </div>
         </td>
         <td><a href="{{participant.get_absolute_url}}">{% trans 'View' %}</a></td>

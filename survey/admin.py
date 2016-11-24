@@ -149,10 +149,12 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         context['object'] = obj
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         context['survey'] = obj
-        qs = Participant.objects.filter(survey=obj).with_progress_stats().all()
+        qs = (Participant.objects.filter(survey=obj).
+              with_progress_stats().
+              select_related('health_fund').all())
         context['participant_list'] = qs
-        context['sum_fill_count'] = sum(x.fill_count() for x in qs)
-        context['sum_required_count'] = sum(x.required_count() for x in qs)
+        context['sum_fill_count'] = sum(x.get_answer_count() for x in qs)
+        context['sum_required_count'] = sum(x.get_required_count() for x in qs)
         context['sum_progress'] = context['sum_fill_count'] / context['sum_required_count'] * 100
         return render(request, 'survey/survey_admin_stats.html', context=context)
     stats.short_description = _("Statistics of progress of analysis")
@@ -173,9 +175,18 @@ class ParticipantAdmin(ImportExportMixin, VersionAdmin):
         return '<a href="%s">%s</a>' % (url, url)
     solve_url.allow_tags = True
     solve_url.short_description = _("Solve url")
-    list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url')
+    list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url', 'get_progress_display')
     list_filter = ('survey', 'health_fund')
     resource_class = ParticipantResource
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(ParticipantAdmin, self).get_queryset(*args, **kwargs)
+        return qs.with_progress_stats()
+
+    def get_progress_display(self, obj):
+        return obj.get_progress_display()
+    get_progress_display.admin_order_field = 'progress'
+    get_progress_display.short_description = _('Progress')
 
 
 admin.site.register(Participant, ParticipantAdmin)

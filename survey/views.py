@@ -94,7 +94,7 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
 
     def get_survey_list_url(self):
         return reverse('survey:list', kwargs={'password': self.kwargs['password'],
-                                               'participant': self.kwargs['participant']})
+                                              'participant': self.kwargs['participant']})
 
     def get_context_data(self, **kwargs):
         context = super(HospitalSurveyView, self).get_context_data(**kwargs)
@@ -113,4 +113,3 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         form.save()
         return super(HospitalSurveyView, self).form_valid(form, *args, **kwargs)
-
