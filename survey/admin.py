@@ -72,7 +72,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Survey
     '''
-    change_actions = ['validate', 'export', 'preview', 'stats']
+    change_actions = ['validate', 'export', 'overview', 'stats']
     list_display = ('title', 'created', 'modified', 'is_valid')
     inlines = [
         CategoryInline,
@@ -101,17 +101,17 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     validate.short_description = _("Validate in detail")
     validate.label = _("Validate")
 
-    def preview(self, request, obj):
+    def overview(self, request, obj):
         context = {}
         context['opts'] = self.opts
         context['original'] = obj
-        context['title'] = self.preview.short_description
+        context['title'] = self.overview.short_description
         context['has_change_permission'] = request.user.has_perm('survey.change_survey')
         context['object'] = context['survey'] = (Survey.objects.prefetch_full_content().
                                                  get(pk=obj.pk))
-        return render(request, 'survey/survey_admin_preview.html', context=context)
-    preview.short_description = _("Preview a survey")
-    preview.label = _("Preview")
+        return render(request, 'survey/survey_admin_overview.html', context=context)
+    overview.short_description = _("Overview a survey")
+    overview.label = _("Overview")
 
     def export(self, request, obj):
         response = HttpResponse(content_type='text/csv')
