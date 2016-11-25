@@ -1,0 +1,52 @@
+{% extends 'survey/base.html' %}
+{% load i18n %}
+{% block content %}
+<h1>{{survey}} <small>{{hospital}}</small></h1>
+
+{{ survey.instruction | safe }}
+<form method="POST">
+    {% csrf_token %}
+    {% for category, question_set in form.grouped_fields %}
+    <h2>{{category}}</h2>
+    {% for question, subquestion_set, hospital_set in question_set %}
+    <h3>{{question}}</h3>
+    <table>
+        <tr>
+            <td>&nbsp;</td>
+            {% for subquestion in subquestion_set %}
+            <th>{{subquestion}}</th>
+            {% endfor %}
+        </tr>
+        {% for hospital, hospitalsubquestion_set in hospital_set %}
+        <tr>
+            <td>{{hospital}}</td>
+            {% for field in hospitalsubquestion_set %}
+            <td>
+                <div>
+                    {{ field.errors }}
+                    {{ field }}
+                </div>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endfor %}
+    {% endfor %}
+    <div>
+        {{ survey.end_text | safe }}
+    </div>
+    <div>
+        <button type="submit" class="btn-brand">{% trans 'Save answer' %}</button>
+    </div>
+    <br>
+    <br>
+    <br>
+    <a href="{{survey_print_url}}" class="btn-brand">{% trans 'Print survey' %}</a>
+</form>
+{% endblock %} {% block javscripts %} {{ block.super }}
+<script src="https://cdn.rawgit.com/leafo/sticky-kit/v1.1.2/jquery.sticky-kit.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$('h3').stick_in_parent();
+</script>
+{% endblock javscripts %}

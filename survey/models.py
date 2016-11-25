@@ -145,6 +145,9 @@ class ParticipantQuerySet(models.QuerySet):
     def with_survey(self):
         return self.prefetch_related('survey__category_set__question_set__subquestion_set')
 
+    def with_hospital(self):
+        return self.prefetch_related('health_fund__hospital_set')
+
     def with_progress_stats(self):
         def fl(expr):
             return Cast(expr, models.FloatField())
