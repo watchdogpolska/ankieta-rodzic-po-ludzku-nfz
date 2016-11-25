@@ -6,8 +6,11 @@ from . import views
 
 urlpatterns = [
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/$',
-        views.HospitalListView.as_view(),
+        views.ParticipantFormView.as_view(),
         name="list"),
+    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/$',
+        views.HospitalListView.as_view(),
+        name="list2"),
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/~print$',
         views.SurveyPrintView.as_view(),
         name="print"),

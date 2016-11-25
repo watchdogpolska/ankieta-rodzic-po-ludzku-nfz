@@ -2,15 +2,15 @@ from collections import namedtuple
 
 from braces.views import FormValidMessageMixin
 from django.core.urlresolvers import reverse
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
 from django.views.generic import FormView, ListView
 from reversion.views import RevisionMixin
 
-from .forms import SurveyForm
+from .forms import ParticipantForm, SurveyForm
 from .models import Hospital, Participant
-
 
 SurveyHospitalForm = namedtuple('SurveyHospitalForm', ['hospital', 'form'])
 
@@ -104,8 +104,7 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
         return context
 
     def get_success_url(self):
-        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
-                                              'participant': self.kwargs['participant']})
+        return self.get_survey_list_url()
 
     def get_form_valid_message(self):
         return _("Answer for {hospital} was saved!").format(hospital=self.hospital)
@@ -113,3 +112,47 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         form.save()
         return super(HospitalSurveyView, self).form_valid(form, *args, **kwargs)
+
+
+class ParticipantFormView(RevisionMixin, FormValidMessageMixin, FormView):
+    form_class = ParticipantForm
+    template_name = 'survey/participant_form.html'
+
+    @cached_property
+    def participant(self):
+        try:
+            return Participant.objects.with_survey().with_hospital().get(
+                password=self.kwargs['password'],
+                pk=self.kwargs['participant'])
+        except Participant.DoesNotExist:
+            raise Http404
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kw = super(ParticipantFormView, self).get_form_kwargs(*args, **kwargs)
+        kw['participant'] = self.participant
+        kw['user'] = self.request.user
+        return kw
+
+    def get_survey_list_url(self):
+        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
+                                              'participant': self.kwargs['participant']})
+
+    def get_survey_print_url(self):
+        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
+    def get_form_valid_message(self):
+        return _("Answer was saved!")
+
+    def get_success_url(self):
+        return self.get_survey_list_url()
+
+    def get_context_data(self, **kwargs):
+        context = super(ParticipantFormView, self).get_context_data(**kwargs)
+        context['participant'] = self.participant
+        context['survey_print_url'] = self.get_survey_print_url()
+        return context
+
+    def form_valid(self, form, *args, **kwargs):
+        form.save()
+        return super(ParticipantFormView, self).form_valid(form, *args, **kwargs)

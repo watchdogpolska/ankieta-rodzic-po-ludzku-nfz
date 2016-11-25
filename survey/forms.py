@@ -12,7 +12,22 @@ from .models import Answer, Hospital, Subquestion
 Group = namedtuple('Group', ['obj', 'set'])
 
 
-class SurveyForm(forms.Form):
+class FieldMixin(object):
+
+    def get_field(self, subquestion, *args, **kwargs):
+        if subquestion.kind == Subquestion.KIND_INT:
+            return forms.IntegerField(label=subquestion.name,
+                                      initial=self.get_initial(subquestion, *args, **kwargs))
+        if subquestion.kind == Subquestion.KIND_TEXT:
+            return forms.CharField(label=subquestion.name,
+                                   initial=self.get_initial(subquestion, *args, **kwargs))
+        if subquestion.kind == Subquestion.KIND_LTEXT:
+            return forms.CharField(label=subquestion.name,
+                                   initial=self.get_initial(subquestion, *args, **kwargs),
+                                   widget=forms.widgets.Textarea())
+
+
+class SurveyForm(FieldMixin, forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.participant = kwargs.pop('participant')
@@ -33,17 +48,8 @@ class SurveyForm(forms.Form):
                     field = self.get_field(subquestion)
                     self.fields[key] = field
 
-    def get_field(self, subquestion):
-        if subquestion.kind == Subquestion.KIND_INT:
-            return forms.IntegerField(label=subquestion.name,
-                                      initial=self.initial_sq.get(subquestion.pk, ''))
-        if subquestion.kind == Subquestion.KIND_TEXT:
-            return forms.CharField(label=subquestion.name,
-                                   initial=self.initial_sq.get(subquestion.pk, ''))
-        if subquestion.kind == Subquestion.KIND_LTEXT:
-            return forms.CharField(label=subquestion.name,
-                                   initial=self.initial_sq.get(subquestion.pk, ''),
-                                   widget=forms.widgets.Textarea())
+    def get_initial(self, subquestion):
+        return self.initial_sq.get(subquestion.pk, '')
 
     def get_key(self, subquestion):
         return 'sq-{subquestion}'.format(subquestion=subquestion.pk)
@@ -56,7 +62,7 @@ class SurveyForm(forms.Form):
                 subquestion_set = []
                 for subquestion in question.subquestion_set.all():
                     field = self[self.get_key(subquestion)]
-                    subquestion_set.append(Group(subquestion, field))
+                    subquestion_set.append((subquestion, field))
                 question_set.append(Group(question, subquestion_set))
             output.append(Group(category, question_set))
         return output
@@ -89,8 +95,10 @@ class SurveyForm(forms.Form):
                     index += 1
                 question_set.append(Group(question, subquestion_set))
             output.append(Group(category, question_set))
-        linked_list = Hospital.objects.answer_fetch(self.participant).linked(participant=self.participant.pk,
-                                                                             password=self.participant.password)
+        linked_list = (Hospital.objects.
+                       answer_fetch(self.participant).
+                       linked(participant=self.participant.pk,
+                              password=self.participant.password))
         linked_list_left = [x for x in linked_list if x.status is not True]
         linked_done = len(linked_list_left)
         linked_total = len(linked_list)
@@ -119,3 +127,80 @@ class SurveyForm(forms.Form):
         self.save_model()
         self.send_notification()
         return self.objs
+
+
+class ParticipantForm(FieldMixin, forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.participant = kwargs.pop('participant')
+        self.user = kwargs.pop('user', None)
+
+        self.survey = self.participant.survey
+        self.hospitals = self.participant.health_fund.hospital_set.all()
+        answer_qs = Answer.objects.filter(participant=self.participant).all()
+        self.initial_sq = {(x.hospital_id, x.subquestion_id): x.answer for x in answer_qs}
+
+        super(ParticipantForm, self).__init__(*args, **kwargs)
+        for category in self.survey.category_set.all():
+            for question in category.question_set.all():
+                for subquestion in question.subquestion_set.all():
+                    for hospital in self.hospitals:
+                        key = self.get_key(hospital, subquestion)
+                        field = self.get_field(subquestion=subquestion,
+                                               hospital=hospital)
+                        self.fields[key] = field
+
+    def get_key(self, hospital, subquestion):
+        return 'h-{hospital}-sq-{subquestion}'.format(hospital=hospital.pk,
+                                                      subquestion=subquestion.pk)
+
+    def get_initial(self, subquestion, hospital):
+        return self.initial_sq.get((hospital.id, subquestion.id), '')
+
+    def grouped_fields(self):
+        output = []
+        for category in self.survey.category_set.all():
+            question_set = []
+            for question in category.question_set.all():
+                subquestion_set = [x for x in question.subquestion_set.all()]
+
+                hospital_set = []
+                for hospital in self.hospitals:
+                    hospitalsubquestion_set = []
+
+                    for subquestion in subquestion_set:
+                        field = self[self.get_key(hospital, subquestion)]
+                        hospitalsubquestion_set.append(field)
+                    hospital_set.append((hospital, hospitalsubquestion_set))
+
+                question_set.append((question, subquestion_set, hospital_set))
+            output.append(Group(category, question_set))
+        return output
+
+    def save_model(self):
+        self.objs = []
+        self.createds = []
+        to_bulk_create = []
+
+        answers = {(x.hospital_id, x.subquestion_id): x
+                   for x in Answer.objects.filter(participant=self.participant).all()}
+        for category in self.survey.category_set.all():
+            for question in category.question_set.all():
+                for subquestion in question.subquestion_set.all():
+                    for hospital in self.participant.health_fund.hospital_set.all():
+                        data = self.cleaned_data[self.get_key(hospital, subquestion)]
+                        try:
+                            a = answers[(hospital.pk, subquestion.pk)]
+                            if a.answer != data:
+                                a.answer = data
+                                a.save()
+                        except KeyError:
+                            to_bulk_create.append(Answer(participant=self.participant,
+                                                         subquestion=subquestion,
+                                                         hospital=hospital,
+                                                         answer=data))
+        Answer.objects.bulk_create(to_bulk_create)
+
+    def save(self):
+        self.save_model()
+        # self.send_notification()
