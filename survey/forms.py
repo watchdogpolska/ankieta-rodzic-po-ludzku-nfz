@@ -26,6 +26,12 @@ class FieldMixin(object):
                                    initial=self.get_initial(subquestion, *args, **kwargs),
                                    widget=forms.widgets.Textarea())
 
+    def get_recipient(self):
+        recipients = [x.email for x in User.objects.filter(is_staff=True, notification=True).all()]
+        if not self.user.is_staff and self.participant.health_fund.email:
+            recipients += [self.participant.health_fund.email, ]
+        return recipients
+
 
 class SurveyForm(FieldMixin, forms.Form):
 
@@ -112,14 +118,12 @@ class SurveyForm(FieldMixin, forms.Form):
                    'hospital': self.hospital,
                    'participant': self.participant}
         content = render_to_string('survey/survey_email.html', context)
-        recipients = [x.email for x in User.objects.filter(is_staff=True, notification=True).all()]
-        if not self.user.is_staff:
-            recipients += [self.participant.health_fund.email, ]
+
         return send_mail(
             _('Answer confirmation'),
             content,
             settings.DEFAULT_FROM_EMAIL,
-            recipients,
+            self.get_recipient(),
             fail_silently=False,
         )
 
@@ -163,7 +167,6 @@ class ParticipantForm(FieldMixin, forms.Form):
             question_set = []
             for question in category.question_set.all():
                 subquestion_set = [x for x in question.subquestion_set.all()]
-
                 hospital_set = []
                 for hospital in self.hospitals:
                     hospitalsubquestion_set = []
@@ -175,6 +178,38 @@ class ParticipantForm(FieldMixin, forms.Form):
 
                 question_set.append((question, subquestion_set, hospital_set))
             output.append(Group(category, question_set))
+        return output
+
+    def send_notification(self):
+        output = []
+        answers = {(x.hospital_id, x.subquestion_id): x
+                   for x in Answer.objects.filter(participant=self.participant).all()}
+
+        for category in self.survey.category_set.all():
+            question_set = []
+            for question in category.question_set.all():
+                subquestions = [x for x in question.subquestion_set.all()]
+
+                subquestion_set = []
+                for subquestion in subquestions:
+                    answer_set = []
+                    for hospital in self.hospitals:
+                        data = answers[(hospital.pk, subquestion.pk)].answer
+                        answer_set.append((hospital, data))
+                    subquestion_set.append(Group(subquestion, answer_set))
+
+                question_set.append((question, subquestion_set))
+            output.append(Group(category, question_set))
+        context = {'object_list': output,
+                   'participant': self.participant}
+        content = render_to_string('survey/participant_email.html', context)
+        return send_mail(
+            _('Answer confirmation'),
+            content,
+            settings.DEFAULT_FROM_EMAIL,
+            self.get_recipient(),
+            fail_silently=False,
+        )
         return output
 
     def save_model(self):
@@ -191,7 +226,7 @@ class ParticipantForm(FieldMixin, forms.Form):
                         data = self.cleaned_data[self.get_key(hospital, subquestion)]
                         try:
                             a = answers[(hospital.pk, subquestion.pk)]
-                            if a.answer != data:
+                            if a.answer != data:  # if any changes
                                 a.answer = data
                                 a.save()
                         except KeyError:
@@ -203,4 +238,4 @@ class ParticipantForm(FieldMixin, forms.Form):
 
     def save(self):
         self.save_model()
-        # self.send_notification()
+        self.send_notification()
