@@ -70,7 +70,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
         model = models.Question
 
     category = factory.SubFactory(CategoryFactory)
-    name = factory.Sequence(lambda n: "Survey-%03d" % n)
+    name = factory.Sequence(lambda n: "Question-%03d" % n)
 
 
 class SubquestionFactory(factory.django.DjangoModelFactory):
@@ -79,7 +79,7 @@ class SubquestionFactory(factory.django.DjangoModelFactory):
         model = models.Subquestion
 
     question = factory.SubFactory(QuestionFactory)
-    name = factory.Sequence(lambda n: "Survey-%03d" % n)
+    name = factory.Sequence(lambda n: "Subquestion-%03d" % n)
 
 
 class AnswerFactory(factory.django.DjangoModelFactory):
