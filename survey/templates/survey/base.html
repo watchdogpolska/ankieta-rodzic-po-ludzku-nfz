@@ -7,6 +7,7 @@
 <!--<![endif]-->
 
 <head>
+    {% block head %}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title></title>
@@ -17,9 +18,11 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <script src="{% static 'js/vendor/modernizr-2.8.3-respond-1.4.2.min.js' %}"></script>
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    {% endblock head %}
 </head>
 
 <body>
+    {% block body%}
     <div class="header">
         <div class="container">
             <div class="header-top">
@@ -32,15 +35,17 @@
     <div class="content">
         <div class="container">
             <div class="page-content">
+                {% include "partials/_flash_messages.html" %}
                 {% block content %}
                 {% endblock content%}
                 <p class="text-center">
-                    Projekt dofinansowany ze środków Programu Fundusz Inicjatyw Obywatelskich
-                    <img src="{% static 'img/logo-fio.jpg' %}" width="430" height="268" alt="">
+                    Projekt dofinansowany ze środków Programu Fundusz Inicjatyw Obywatelskich<br>
+                    <img src="{% static 'img/logo-fio.jpg' %}" width="215" height="134" alt="Programu Fundusz Inicjatyw Obywatelskich">
                 </p>
             </div>
         </div>
     </div>
+    {% endblock body %}
     {% block javscripts %}
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script>

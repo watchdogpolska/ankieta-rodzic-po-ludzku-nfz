@@ -136,27 +136,7 @@ h6{
 table, td, th{
     border: 1px solid black;
 }
-table th,
-table td {
-    width: 172px;
-}
 
-table td input {
-    width: 152px;
-}
-
-table th.one-and-halt-column,
-table td.one-and-halt-column {
-    width: 258px;
-}
-table th.double-column,
-table td.double-column {
-    width: 344px;
-}
-table th.triple-column,
-table td.triple-column {
-    width: 516px;
-}
 
 
 .text-center{
@@ -194,8 +174,8 @@ table.table th, table.table td {
 }
 
 table.table thead th{
-  background: #bed5ec;
-  padding: 5px;
+  background: #e1e7ed;
+  padding: 10px;
   font-weight: normal;
   text-align: left;
   text-transform: uppercase;
@@ -203,7 +183,7 @@ table.table thead th{
 }
 
 table.table tbody td{
-  padding: 5px;
+  padding: 10px;
   border-top: 2px solid #bed5ec;
 }
 .form-group:before,
@@ -233,6 +213,37 @@ table.table tbody td{
 .form-group-input select,
 .form-group-input input {
   width: 98%;
+}
+// messages
+
+.messages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.messages .success{
+  background: #3c9f36;
+  color: white;
+  padding: 15px;
+}
+.messages .debug,
+.messages .info,
+.messages .warning,
+.messages .error
+{
+  background: #e72832;
+  color: white;
+  padding: 15px;
+}
+
+.table-sticky td,
+.table-sticky th{
+  text-align: center;
+  padding: 15px 10px;
+}
+.table-sticky td input{
+  width: 80%;
+  max-width: 150px;
 }
 
 /* ==========================================================================

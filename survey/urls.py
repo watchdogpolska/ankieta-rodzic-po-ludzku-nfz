@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/$',
         views.ParticipantFormView.as_view(),
         name="list"),
-    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/$',
+    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/per_hospital/$',
         views.HospitalListView.as_view(),
         name="list2"),
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/~print$',
