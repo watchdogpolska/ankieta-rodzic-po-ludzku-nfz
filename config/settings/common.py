@@ -246,3 +246,5 @@ TINYMCE_DEFAULT_CONFIG = {
     'cleanup_on_startup': True,
     'custom_undo_redo_levels': 10,
 }
+
+REDIRECT_HOME = "http://localhost:8000/admin/"
