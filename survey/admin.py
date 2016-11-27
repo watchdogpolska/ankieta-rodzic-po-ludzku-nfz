@@ -231,7 +231,7 @@ class QuestionAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Question
     '''
-    list_display = ('name', 'created', 'modified')
+    list_display = ('name', 'created', 'modified', 'ordering')
     list_filter = ('category__survey',)
     inlines = [
         SubquestionInline,
@@ -260,7 +260,7 @@ class SubquestionAdmin(DjangoObjectActions, VersionAdmin):
     '''
         Admin View for Subquestion
     '''
-    list_display = ('name', 'question', 'kind')
+    list_display = ('name', 'question', 'kind', 'ordering')
     list_filter = ('question__category__survey',)
     inlines = [
         AnswerInline,
