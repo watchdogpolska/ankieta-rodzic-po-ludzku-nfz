@@ -7,6 +7,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import F, Count
 from django.db.models.functions import Cast
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -91,6 +93,10 @@ class SurveyQuerySet(models.QuerySet):
     def prefetch_full_content(self):
         return self.prefetch_related('category_set__question_set__subquestion_set')
 
+    def with_db_subquestion_count(self):
+        return self.annotate(db_subquestion_count=Count('category__question__subquestion',
+                                                        distinct=True))
+
 
 @python_2_unicode_compatible
 class Survey(TimeStampedModel):
@@ -100,6 +106,8 @@ class Survey(TimeStampedModel):
     instruction = HTMLField(verbose_name=_("Instruction"), blank=True)
     end_text = HTMLField(verbose_name=_("End text"), blank=True)
     submit_text = HTMLField(verbose_name=_("Submit text"), blank=True)
+    subquestion_count = models.IntegerField(verbose_name=_("Total number of subquestion"),
+                                            default=0)
     participants = models.ManyToManyField(NationalHealtFund,
                                           verbose_name=_("Participants"),
                                           through="Participant")
@@ -131,6 +139,11 @@ class Survey(TimeStampedModel):
                 log.append(self._count_msg(question, 'subquestion_set'))
         return log
 
+    def update_subquestion_counter(self):
+        obj = Survey.objects.with_db_subquestion_count().get(pk=self.pk)
+        obj.subquestion_count = obj.db_subquestion_count
+        obj.save(update_fields=["subquestion_count"])
+
     class Meta:
         verbose_name = _("Survey")
         verbose_name_plural = _("Surveys")
@@ -151,10 +164,7 @@ class ParticipantQuerySet(models.QuerySet):
     def with_progress_stats(self):
         def fl(expr):
             return Cast(expr, models.FloatField())
-        qs = self.annotate(answer_count=Count('answer', distinct=True))
-        qs = qs.annotate(subquestion_count=Count('survey__category__question__subquestion',
-                                                 distinct=True))
-        qs = qs.annotate(hospital_count=Count('health_fund__hospital', distinct=True))
+        qs = self.annotate(hospital_count=Count('health_fund__hospital', distinct=True))
         up = F('answer_count')
         down = F('subquestion_count') * F('hospital_count')
         expr = (up / down) * 100
@@ -168,15 +178,10 @@ class Participant(TimeStampedModel):
                                     on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, verbose_name=_("Survey"), on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
+    answer_count = models.IntegerField(verbose_name=_("Answer count"), default=0)
     objects = ParticipantQuerySet.as_manager()
 
     def get_answer_count(self):
-        if not hasattr(self, 'answer_count'):
-            try:
-                self._prefetched_objects_cache['answer']
-                self.answer_count = len(self.answer_set.all())
-            except (AttributeError, KeyError):
-                self.answer_count = self.answer_set.count()
         return self.answer_count
 
     def get_hospital_count(self):
@@ -185,11 +190,7 @@ class Participant(TimeStampedModel):
         return self.hospital_count
 
     def get_subquestion_count(self):
-        if not hasattr(self, 'subquestion_count'):
-            self.subquestion_count = (Subquestion.objects.
-                                      filter(question__category__survey__participant=self).
-                                      count())
-        return self.subquestion_count
+        return self.survey.subquestion_count
 
     def get_required_count(self):
         return self.get_hospital_count() * self.get_subquestion_count()
@@ -224,6 +225,9 @@ class Category(TimeStampedModel):
     ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
     objects = CategoryQuerySet.as_manager()
 
+    def update_subquestion_counter(self):
+        self.survey.update_subquestion_counter()
+
     class Meta:
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
@@ -243,6 +247,9 @@ class Question(TimeStampedModel):
     name = models.CharField(verbose_name=_("Name"), max_length=250)
     ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)
     objects = QuestionQuerySet.as_manager()
+
+    def update_subquestion_counter(self):
+        self.category.update_subquestion_counter()
 
     class Meta:
         verbose_name = _("Question")
@@ -274,6 +281,9 @@ class Subquestion(TimeStampedModel):
                             default=KIND_TEXT)
     objects = SubquestionQuerySet.as_manager()
 
+    def update_subquestion_counter(self):
+        self.question.update_subquestion_counter()
+
     class Meta:
         verbose_name = _("Subquestion")
         verbose_name_plural = _("Subquestions")
@@ -302,3 +312,14 @@ class Answer(TimeStampedModel):
 
     def __str__(self):
         return str(self.answer)
+
+
+@receiver(post_save, sender=Subquestion, dispatch_uid="subquestion_increment_subquestioncount")
+def increment_subquestioncount(sender, instance, created, **kwargs):
+    if created:
+        instance.update_subquestion_counter()
+
+
+@receiver(post_delete, sender=Subquestion, dispatch_uid="subquestion_decrement_subquestioncount")
+def decrement_subquestioncount(sender, instance, **kwargs):
+    instance.update_subquestion_counter()

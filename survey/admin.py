@@ -125,7 +125,6 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         fieldnames = ['Health fund', 'Hospital']
         fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
                        filter(question__category__survey=obj).all()]
-        print("*" * 25)
         answer_qs = Answer.objects.filter(participant__survey=obj).all()
         writer = csv.DictWriter(response, fieldnames=fieldnames)
         writer.writeheader()
@@ -177,6 +176,7 @@ class ParticipantAdmin(ImportExportMixin, VersionAdmin):
     solve_url.short_description = _("Solve url")
     list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url', 'get_progress_display')
     list_filter = ('survey', 'health_fund')
+    readonly_fields = ('answer_count',)
     resource_class = ParticipantResource
 
     def get_queryset(self, *args, **kwargs):
