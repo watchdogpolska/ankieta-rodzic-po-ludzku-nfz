@@ -166,7 +166,7 @@ class ParticipantQuerySet(models.QuerySet):
             return Cast(expr, models.FloatField())
         qs = self.annotate(hospital_count=Count('health_fund__hospital', distinct=True))
         up = F('answer_count')
-        down = F('subquestion_count') * F('hospital_count')
+        down = F('survey__subquestion_count') * F('hospital_count')
         expr = (up / down) * 100
         qs = qs.annotate(progress=expr)  # Due django casting bug available in Python as int only
         return qs
