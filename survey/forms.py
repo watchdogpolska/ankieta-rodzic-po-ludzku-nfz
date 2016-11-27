@@ -4,10 +4,11 @@ from ankieta_nfz.users.models import User
 from django import forms
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import F
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 
-from .models import Answer, Hospital, Subquestion
+from .models import Answer, Hospital, Participant, Subquestion
 
 Group = namedtuple('Group', ['obj', 'set'])
 
@@ -234,6 +235,8 @@ class ParticipantForm(FieldMixin, forms.Form):
                                                          subquestion=subquestion,
                                                          hospital=hospital,
                                                          answer=data))
+        Participant.objects.filter(pk=self.participant.pk).update(answer_count=F('answer_count') +
+                                                                  len(to_bulk_create))
         Answer.objects.bulk_create(to_bulk_create)
 
     def save(self):
