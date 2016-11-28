@@ -158,12 +158,18 @@ class QuestionSurveyView(ParticipantMixin, RevisionMixin, FormValidMessageMixin,
         return reverse('survey:list', kwargs={'password': self.kwargs['password'],
                                               'participant': self.kwargs['participant']})
 
+    def get_survey_print_url(self):
+        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
     def get_context_data(self, **kwargs):
         context = super(QuestionSurveyView, self).get_context_data(**kwargs)
         context['survey'] = self.survey
         context['question'] = self.question
         context['subquestion_set'] = self.question.subquestion_set.all()
         context['survey_list_url'] = self.get_survey_list_url()
+        context['survey_print_url'] = self.get_survey_print_url()
+
         return context
 
     def get_success_url(self):

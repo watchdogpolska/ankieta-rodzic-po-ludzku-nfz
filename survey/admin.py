@@ -73,7 +73,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         Admin View for Survey
     '''
     change_actions = ['validate', 'export', 'overview', 'stats']
-    list_display = ('title', 'created', 'modified', 'is_valid')
+    list_display = ('title', 'created', 'modified', 'is_valid', 'get_style_display')
     inlines = [
         CategoryInline,
         ParticipantInline,
