@@ -20,7 +20,7 @@ class values_or_integer_validator(object):
         self.code = code
 
     def get_message(self, value):
-        values_str = _(" and ").join('"%s"'.format(x) for x in self.values)
+        values_str = _(" and ").join('"{0}"'.format(x) for x in self.values)
 
         return _('The value entered "{value}" is incorrect. ' +
                  'Only allowable values of {values} and numbers.').format(value=value,
