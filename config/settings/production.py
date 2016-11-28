@@ -46,7 +46,7 @@ INSTALLED_APPS += ('gunicorn', )
 # EMAIL
 # ------------------------------------------------------------------------------
 DEFAULT_FROM_EMAIL = env('DJANGO_DEFAULT_FROM_EMAIL',
-                         default='Ankieta NFZ <noreply@nfz.ankietypoloznicze.rodzicpoludzku.pl.>')
+                         default='Ankieta NFZ <noreply@nfz.ankietypoloznicze.rodzicpoludzku.pl>')
 EMAIL_SUBJECT_PREFIX = env('DJANGO_EMAIL_SUBJECT_PREFIX', default='[Ankieta NFZ] ')
 SERVER_EMAIL = env('DJANGO_SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 
