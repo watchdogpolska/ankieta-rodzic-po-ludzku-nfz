@@ -12,7 +12,7 @@ urlpatterns = [
         views.HospitalListView.as_view(),
         name="list2"),
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/~print$',
-        views.SurveyPrintView.as_view(),
+        views.SurveyPrintDispatchView.as_view(),
         name="print"),
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/hospital-(?P<hospital>[\d-]+)/$',
         views.HospitalSurveyView.as_view(),

@@ -1,0 +1,37 @@
+{% extends 'survey/_print.html' %}
+{% load staticfiles %}
+{% block content %}
+  <a href="http://rodzicpoludzku.pl/">
+      <img src="{% static 'img/logo.png' %}" alt="" height="130" class="header-logo">
+  </a>
+  {% for category, question_set in participant_form.grouped_fields %}
+  <h2>{{category}}</h2>
+  {% for question, subquestion_set, hospital_set in question_set %}
+  <h3>{{question}}</h3>
+  <table>
+      <thead>
+        <tr>
+            <th class="col-{{subquestion_set|length}} col-first">&nbsp;</td>
+            {% for subquestion in subquestion_set %}
+            <th class="col-{{subquestion_set|length}}">{{subquestion}}</th>
+            {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for hospital, hospitalsubquestion_set in hospital_set %}
+        <tr>
+            <td class="col-{{hospitalsubquestion_set|length}} col-first">{{hospital}}</th>
+            {% for field in hospitalsubquestion_set %}
+            <td class="col-{{hospitalsubquestion_set|length}}">
+                X<div>
+                    {{ field.initial }}
+                </div>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+  </table>
+  {% endfor %}
+  {% endfor %}
+{% endblock %}

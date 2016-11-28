@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
-from django.views.generic import FormView, ListView, View
+from django.views.generic import FormView, ListView, TemplateView, View
 from reversion.views import RevisionMixin
 
 from .forms import ParticipantForm, QuestionForm, SurveyForm
@@ -15,12 +15,14 @@ SurveyHospitalForm = namedtuple('SurveyHospitalForm', ['hospital', 'form'])
 
 
 class ParticipantMixin(object):
+    cached_participant = None
 
     @cached_property
     def participant(self):
-        return get_object_or_404(Participant.objects.with_survey().with_hospital(),
-                                 password=self.kwargs['password'],
-                                 pk=self.kwargs['participant'])
+        return getattr(self, 'cached_participant') or \
+            get_object_or_404(Participant.objects.with_survey().with_hospital(),
+                              password=self.kwargs['password'],
+                              pk=self.kwargs['participant'])
 
 
 class HospitalMixin(ParticipantMixin):
@@ -70,23 +72,6 @@ class QuestionListView(ParticipantMixin, ListView):
         context['print_url'] = self.get_print_url()
         context['participant'] = self.participant
         context['survey'] = self.participant.survey
-        return context
-
-
-class SurveyPrintView(HospitalListView):
-    template_name = 'survey/survey_print.html'
-    form_class = SurveyForm
-    model = Hospital
-
-    def get_form(self, hospital):
-        return self.form_class(hospital=hospital,
-                               participant=self.participant)
-
-    def get_context_data(self, **kwargs):
-        context = super(SurveyPrintView, self).get_context_data(**kwargs)
-        context['hospital_forms'] = [SurveyHospitalForm(hospital=hospital,
-                                                        form=self.get_form(hospital))
-                                     for hospital in self.object_list]
         return context
 
 
@@ -228,4 +213,43 @@ class SurveyDispatchView(View):
                       Survey.STYLE.hospital: HospitalListView,
                       Survey.STYLE.question: QuestionListView}
         handler = dispatcher[participant.survey.style].as_view()
+        return handler(request, *args, **kwargs)
+
+
+class HospitalPrintView(HospitalListView):
+    template_name = 'survey/survey_print.html'
+    model = Hospital
+
+    def get_form(self, hospital):
+        return self.form_class(hospital=hospital,
+                               participant=self.participant)
+
+    def get_context_data(self, **kwargs):
+        context = super(HospitalPrintView, self).get_context_data(**kwargs)
+        context['hospital_forms'] = [SurveyHospitalForm(hospital=hospital,
+                                                        form=self.get_form(hospital))
+                                     for hospital in self.object_list]
+        return context
+
+
+class ParticipantPrintView(ParticipantMixin, TemplateView):
+    template_name = 'survey/participant_print.html'
+    model = Survey
+
+    def get_context_data(self, **kwargs):
+        context = super(ParticipantPrintView, self).get_context_data(**kwargs)
+        context['participant_form'] = ParticipantForm(participant=self.participant,
+                                                      user=self.request.user)
+        return context
+
+
+class SurveyPrintDispatchView(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        participant = get_object_or_404(Participant.objects.select_related('survey'),
+                                        password=self.kwargs['password'],
+                                        pk=self.kwargs['participant'])
+        dispatcher = {Survey.PRINT_STYLE.per_hospital: HospitalPrintView,
+                      Survey.PRINT_STYLE.per_participant: ParticipantPrintView}
+        handler = dispatcher[participant.survey.print_style].as_view(cached_participant=participant)
         return handler(request, *args, **kwargs)

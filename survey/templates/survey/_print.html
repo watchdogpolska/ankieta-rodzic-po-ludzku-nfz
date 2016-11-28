@@ -75,37 +75,25 @@
         page-break-inside: avoid;
     }
 }
-.seperator {
-        text-align: center;
-        display: block;
-}
+    .seperator {
+            text-align: center;
+            display: block;
+    }
+    td, th{
+    border: black solid 2px;
+    }
+    .col-first {
+        width: 50%;
+    }
+    .table {
+        width
+    }
     </style>
 </head>
 
 <body>
-  {% for hospital, form in hospital_forms %}
-      <div class="seperator">-- Początek pytań dla {{hospital}} --</div>
-      <a href="http://rodzicpoludzku.pl/">
-          <img src="{% static 'img/logo.png' %}" alt="" height="130" class="header-logo">
-      </a>
-      <h1>{{hospital}}</h1>
-      {% for category, question_set in form.grouped_fields %}
-          <h2>{{category}}</h2>
-          {% for question, subquestion_set in question_set %}
-              <div class="question">
-              <h3>{{question}}</h3>
-
-              {% for subquestion, field in subquestion_set %}
-                  <div>
-                  {{ field.label }}: [{{field.initial}}]
-                  </div>
-              {% endfor %}
-              </div>
-          {% endfor %}
-      {% endfor %}
-      <div class="seperator">-- Koniec pytań dla {{hospital}} -- </div>
-      <hr>
-  {% endfor %}
+  {% block content %}
+  {% endblock %}
   <script type="text/javascript">
     window.print();
   </script>

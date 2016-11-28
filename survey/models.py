@@ -106,6 +106,8 @@ class Survey(TimeStampedModel):
     STYLE = Choices((0, 'total', _('Total view')),
                     (1, 'hospital', _('Hospital view')),
                     (2, 'question', _('Question view')))
+    PRINT_STYLE = Choices((0, 'per_hospital', _('Print per hospital')),
+                          (1, 'per_participant', _('Print per participant')))
     title = models.CharField(verbose_name=_("Title"), max_length=250)
     slug = AutoSlugField(populate_from='title', verbose_name=_("Slug"), unique=True)
     welcome_text = HTMLField(verbose_name=_("Welcome text"), blank=True)
@@ -118,6 +120,7 @@ class Survey(TimeStampedModel):
                                           verbose_name=_("Participants"),
                                           through="Participant")
     style = models.IntegerField(choices=STYLE, default=STYLE.question)
+    print_style = models.IntegerField(choices=PRINT_STYLE, default=PRINT_STYLE.per_participant)
     objects = SurveyQuerySet.as_manager()
 
     def _count_msg(self, obj, attribute, found=None, missing=None):
