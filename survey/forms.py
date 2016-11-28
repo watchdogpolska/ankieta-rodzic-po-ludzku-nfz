@@ -60,7 +60,8 @@ class FieldMixin(object):
                                    validators=[values_or_integer_validator(['b/d', 'brak danych'])])
 
     def get_recipient(self):
-        recipients = [x.email for x in User.objects.filter(is_staff=True, notification=True).all()]
+        recipients = [x.email for x in User.objects.filter(is_staff=True, notification=True).all()
+                      if x.email]
         if not self.user.is_staff and self.participant.health_fund.email:
             recipients += [self.participant.health_fund.email, ]
         return recipients
