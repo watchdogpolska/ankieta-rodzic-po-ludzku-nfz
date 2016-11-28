@@ -58,7 +58,9 @@ class QuestionListView(ParticipantMixin, ListView):
 
     def get_queryset(self, *args, **kwargs):
         qs = super(QuestionListView, self).get_queryset(*args, **kwargs)
-        return qs.select_related('survey').prefetch_related('question_set__subquestion_set')
+        return (qs.select_related('survey').
+                prefetch_related('question_set__subquestion_set').
+                filter(survey=self.participant.survey_id))
 
     def get_print_url(self):
         return reverse('survey:print', kwargs={'password': self.kwargs['password'],
@@ -158,10 +160,27 @@ class QuestionSurveyView(ParticipantMixin, RevisionMixin, FormValidMessageMixin,
         return context
 
     def get_success_url(self):
+        if self.request.POST.get('next', 'yes') == 'yes':
+            return self.get_next_question_url() or self.get_survey_list_url()
         return self.get_survey_list_url()
 
     def get_form_valid_message(self):
         return _("Answer for {question} was saved!").format(question=self.question)
+
+    def get_question_list(self):
+        for category in self.survey.category_set.all():
+            for question in category.question_set.all():
+                yield question.pk
+
+    def get_next_question_url(self):
+        question_list = list(self.get_question_list())
+        print(question_list)
+        index = question_list.index(self.question.pk)
+        if index + 1 >= len(question_list):
+            return None
+        return reverse('survey:survey', kwargs={'password': self.participant.password,
+                                                'participant': self.participant.pk,
+                                                'question': question_list[index + 1]})
 
     def form_valid(self, form, *args, **kwargs):
         form.save()
