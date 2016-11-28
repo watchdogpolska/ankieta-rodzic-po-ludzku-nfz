@@ -119,13 +119,15 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         response['Content-Disposition'] = 'attachment; filename="%s"' % (filename, )
 
         def get_key(subquestion):
-            print(fieldnames)
             return "{title}:{pk}".format(title=subquestion.name, pk=subquestion.pk)
 
         fieldnames = ['Health fund', 'Hospital']
         fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
                        filter(question__category__survey=obj).all()]
-        answer_qs = Answer.objects.filter(participant__survey=obj).all()
+        answer_qs = (Answer.objects.filter(participant__survey=obj).
+                     select_related('participant__health_fund').
+                     select_related('subquestion').
+                     select_related('hospital').all())
         writer = csv.DictWriter(response, fieldnames=fieldnames)
         writer.writeheader()
 
