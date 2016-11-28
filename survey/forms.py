@@ -90,6 +90,10 @@ class SurveyForm(FieldMixin, forms.Form):
                     self.createds.append(created)
 
     def send_notification(self):
+        recipients = self.get_recipient()
+        if not recipients:
+            return
+
         output = []
         index = 0
         for category in self.survey.category_set.all():
@@ -124,7 +128,7 @@ class SurveyForm(FieldMixin, forms.Form):
             _('Answer confirmation'),
             content,
             settings.DEFAULT_FROM_EMAIL,
-            self.get_recipient(),
+            recipients,
             fail_silently=False,
         )
 
@@ -142,8 +146,9 @@ class ParticipantForm(FieldMixin, forms.Form):
 
         self.survey = self.participant.survey
         self.hospitals = self.participant.health_fund.hospital_set.all()
-        answer_qs = Answer.objects.filter(participant=self.participant).all()
-        self.initial_sq = {(x.hospital_id, x.subquestion_id): x.answer for x in answer_qs}
+        self.answer_qs = Answer.objects.filter(participant=self.participant).all()
+        self.initial_sq = {(x.hospital_id, x.subquestion_id): x.answer
+                           for x in self.answer_qs}
 
         super(ParticipantForm, self).__init__(*args, **kwargs)
         for category in self.survey.category_set.all():
@@ -182,6 +187,10 @@ class ParticipantForm(FieldMixin, forms.Form):
         return output
 
     def send_notification(self):
+        recipients = self.get_recipient()
+        if not recipients:
+            return
+
         output = []
         answers = {(x.hospital_id, x.subquestion_id): x
                    for x in Answer.objects.filter(participant=self.participant).all()}
@@ -208,10 +217,9 @@ class ParticipantForm(FieldMixin, forms.Form):
             _('Answer confirmation'),
             content,
             settings.DEFAULT_FROM_EMAIL,
-            self.get_recipient(),
+            recipients,
             fail_silently=False,
         )
-        return output
 
     def save_model(self):
         self.objs = []
@@ -227,7 +235,7 @@ class ParticipantForm(FieldMixin, forms.Form):
                         data = self.cleaned_data[self.get_key(hospital, subquestion)]
                         try:
                             a = answers[(hospital.pk, subquestion.pk)]
-                            if a.answer != data:  # if any changes
+                            if a.answer != str(data):  # if any changes
                                 a.answer = data
                                 a.save()
                         except KeyError:
@@ -235,6 +243,105 @@ class ParticipantForm(FieldMixin, forms.Form):
                                                          subquestion=subquestion,
                                                          hospital=hospital,
                                                          answer=data))
+        Participant.objects.filter(pk=self.participant.pk).update(answer_count=F('answer_count') +
+                                                                  len(to_bulk_create))
+        Answer.objects.bulk_create(to_bulk_create)
+
+    def save(self):
+        self.save_model()
+        self.send_notification()
+
+
+class QuestionForm(FieldMixin, forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        self.participant = kwargs.pop('participant')
+        self.user = kwargs.pop('user', None)
+        self.question = kwargs.pop('question')
+
+        self.survey = self.participant.survey
+        self.hospitals = self.participant.health_fund.hospital_set.all()
+        self.answer_qs = Answer.objects.filter(participant=self.participant,
+                                               subquestion__question=self.question).all()
+        self.initial_sq = {(x.hospital_id, x.subquestion_id): x
+                           for x in self.answer_qs}
+
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        for subquestion in self.question.subquestion_set.all():
+            for hospital in self.hospitals:
+                key = self.get_key(hospital, subquestion)
+                field = self.get_field(subquestion=subquestion,
+                                       hospital=hospital)
+                self.fields[key] = field
+
+    def get_key(self, hospital, subquestion):
+        return 'h-{hospital}-sq-{subquestion}'.format(hospital=hospital.pk,
+                                                      subquestion=subquestion.pk)
+
+    def get_initial(self, subquestion, hospital):
+        if (hospital.id, subquestion.id) in self.initial_sq:
+            return self.initial_sq[(hospital.id, subquestion.id)].answer
+        return ''
+
+    def grouped_fields(self):
+        subquestion_set = [x for x in self.question.subquestion_set.all()]
+        hospital_set = []
+        for hospital in self.hospitals:
+            hospitalsubquestion_set = []
+            for subquestion in subquestion_set:
+                field = self[self.get_key(hospital, subquestion)]
+                hospitalsubquestion_set.append(field)
+            hospital_set.append((hospital, hospitalsubquestion_set))
+        return hospital_set
+
+    def send_notification(self):
+        recipients = self.get_recipient()
+        if not recipients:
+            return
+        answers = {(x.hospital_id, x.subquestion_id): x
+                   for x in Answer.objects.filter(participant=self.participant).all()}
+        subquestions = [x for x in self.question.subquestion_set.all()]
+
+        subquestion_set = []
+        for subquestion in subquestions:
+            answer_set = []
+            for hospital in self.hospitals:
+                data = answers[(hospital.pk, subquestion.pk)].answer
+                answer_set.append((hospital, data))
+            subquestion_set.append(Group(subquestion, answer_set))
+
+        context = {'participant': self.participant,
+                   'category': self.question.category,
+                   'survey': self.survey,
+                   'question': self.question,
+                   'subquestion_set': subquestion_set}
+        content = render_to_string('survey/question_email.html', context)
+
+        return send_mail(
+            _('Answer confirmation'),
+            content,
+            settings.DEFAULT_FROM_EMAIL,
+            recipients,
+            fail_silently=False,
+        )
+
+    def save_model(self):
+        to_bulk_create = []
+        answers = {(x.hospital_id, x.subquestion_id): x for x in self.answer_qs}
+
+        for subquestion in self.question.subquestion_set.all():
+            for hospital in self.hospitals:
+                data = self.cleaned_data[self.get_key(hospital, subquestion)]
+                try:
+                    a = answers[(hospital.pk, subquestion.pk)]
+                    if a.answer != str(data):  # if any changes
+                        a.answer = data
+                        a.save()
+                except KeyError:
+                    to_bulk_create.append(Answer(participant=self.participant,
+                                                 subquestion=subquestion,
+                                                 hospital=hospital,
+                                                 answer=data))
         Participant.objects.filter(pk=self.participant.pk).update(answer_count=F('answer_count') +
                                                                   len(to_bulk_create))
         Answer.objects.bulk_create(to_bulk_create)

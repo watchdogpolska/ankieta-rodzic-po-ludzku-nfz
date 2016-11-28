@@ -6,7 +6,7 @@ from . import views
 
 urlpatterns = [
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/$',
-        views.ParticipantFormView.as_view(),
+        views.SurveyDispatchView.as_view(),
         name="list"),
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/per_hospital/$',
         views.HospitalListView.as_view(),
@@ -14,8 +14,11 @@ urlpatterns = [
     url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/~print$',
         views.SurveyPrintView.as_view(),
         name="print"),
-    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/(?P<hospital>[\d-]+)/$',
+    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/hospital-(?P<hospital>[\d-]+)/$',
         views.HospitalSurveyView.as_view(),
+        name="survey"),
+    url(r'^(?P<participant>[\d-]+)/(?P<password>[\d-]+)/question-(?P<question>[\d-]+)/$',
+        views.QuestionSurveyView.as_view(),
         name="survey"),
 
 ]

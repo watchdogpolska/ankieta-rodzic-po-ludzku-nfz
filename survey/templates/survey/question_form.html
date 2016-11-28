@@ -1,0 +1,160 @@
+{% extends 'survey/base.html' %}
+{% load i18n %}
+
+{% block head %}
+{{ block.super }}
+<style type="text/css">
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  #sticked-content{
+    position: fixed;
+    top: 0;
+    width: 100%;
+    left: 0;
+  }
+  #sticked-content table {
+    margin-bottom: 0;
+    background: white;
+  }
+
+table thead th.col-1,
+table tbody td.col-1 {
+  width: 80%;
+}
+
+table thead th.col-2,
+table tbody td.col-2 {
+  width: 40%;
+}
+
+table thead th.col-3,
+table tbody td.col-3 {
+  width: 26.66667%;
+}
+
+table thead th.col-4,
+table tbody td.col-4 {
+  width: 20%;
+}
+
+table thead th.col-5,
+table tbody td.col-5 {
+  width: 16%;
+}
+
+table thead th.col-first,
+table tbody th {
+  width: 20%;
+}
+
+
+
+</style>
+{% endblock head %}
+
+{% block content %}
+<h1>{{survey}}</h1>
+
+{{ survey.instruction | safe }}
+<form method="POST">
+    {% csrf_token %}
+    <h3>{{question}}</h3>
+    <table class="table-sticky">
+        <thead>
+          <tr>
+              <th class="col-{{subquestion_set|length}} col-first">&nbsp;</td>
+              {% for subquestion in subquestion_set %}
+              <th class="col-{{subquestion_set|length}}">{{subquestion}}</th>
+              {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for hospital, hospitalsubquestion_set in form.grouped_fields %}
+          <tr>
+              <th class="col-{{hospitalsubquestion_set|length}} col-first">{{hospital}}</th>
+              {% for field in hospitalsubquestion_set %}
+              <td class="col-{{hospitalsubquestion_set|length}}">
+                  <div>
+                      {{ field.errors }}
+                      {{ field }}
+                  </div>
+              </td>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <br>
+    <div>
+        {{ survey.end_text | safe }}
+    </div>
+    <br>
+    <div>
+        <button type="submit" class="btn-brand">{% trans 'Save answer' %}</button>
+    </div>
+    <br>
+    <br>
+    <br>
+    <a href="{{survey_print_url}}" class="btn-brand">{% trans 'Print survey' %}</a>
+</form>
+{% endblock %}
+
+{% block body %}
+{{ block.super }}
+  <div id="sticked-content" style="display: none;">
+    <div class="container">
+      <div style="padding: 0 20px;">
+        <table>
+          <thead></thead>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock body %}
+
+{% block javscripts %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js" integrity="sha256-LIvc6/vkyvh3J7PFZELcQaeQrICgccTWc3Ty+b2eK0M=" crossorigin="anonymous"></script>
+<script  type="text/javascript">
+'use strict';
+function moveAllChildren(source, target) {
+    target.innerHTML = source.innerHTML;
+}
+var table = Array.from(document.querySelectorAll('.table-sticky'));
+var theads = table.map(function (d) {
+    return d.querySelector('thead');
+});
+var sticked_content = document.querySelector('#sticked-content');
+var sticked_thead = sticked_content.querySelector('thead');
+var theads_reversed = Array.from(theads).reverse();
+function getCurrentHeading() {
+    return theads_reversed.find(function (d) {
+        var pos = d.getBoundingClientRect();
+        var top = pos.top;
+        if (top > 0)
+            return false;
+        return window.pageYOffset >= top;
+    });
+}
+var prev_thead = null;
+window.addEventListener('scroll', function () {
+    console.log({offset:window.pageYOffset});
+    var current_thead = getCurrentHeading();
+    if (current_thead != prev_thead) {
+        // Table heading is visible
+        if (current_thead != null) {
+            // Show sticky header
+            sticked_content.style = 'display: block;';
+            sticked_thead.innerHTML = current_thead.innerHTML;
+        } else {
+            // Show sticky header
+            sticked_content.style = 'display: none;';
+        }
+    }
+    prev_thead = current_thead;
+});
+</script>
+{% endblock javscripts %}

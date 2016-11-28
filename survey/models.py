@@ -7,15 +7,18 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import F, Count
 from django.db.models.functions import Cast
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from model_utils import Choices
 from model_utils.models import TimeStampedModel
 from tinymce.models import HTMLField
 
 LogEntry = namedtuple('LogEntry', ['status', 'text'])
 LinkedHospital = namedtuple('LinkedHospital', ['obj', 'link', 'status'])
+LinkedCategory = namedtuple('LinkedCategory', ['obj', 'question_set'])
+LinkedQuestion = namedtuple('LinkedQuestion', ['obj', 'link', 'status'])
 
 
 def get_secret():
@@ -100,6 +103,9 @@ class SurveyQuerySet(models.QuerySet):
 
 @python_2_unicode_compatible
 class Survey(TimeStampedModel):
+    STYLE = Choices((0, 'total', _('Total view')),
+                    (1, 'hospital', _('Hospital view')),
+                    (2, 'question', _('Question view')))
     title = models.CharField(verbose_name=_("Title"), max_length=250)
     slug = AutoSlugField(populate_from='title', verbose_name=_("Slug"), unique=True)
     welcome_text = HTMLField(verbose_name=_("Welcome text"), blank=True)
@@ -111,6 +117,7 @@ class Survey(TimeStampedModel):
     participants = models.ManyToManyField(NationalHealtFund,
                                           verbose_name=_("Participants"),
                                           through="Participant")
+    style = models.IntegerField(choices=STYLE, default=STYLE.question)
     objects = SurveyQuerySet.as_manager()
 
     def _count_msg(self, obj, attribute, found=None, missing=None):
@@ -211,10 +218,16 @@ class Participant(TimeStampedModel):
         verbose_name = _("Participant")
         verbose_name_plural = _("Participants")
         ordering = ['created']
+        index_together = [
+            ["id", "password"],
+        ]
 
 
 class CategoryQuerySet(models.QuerySet):
-    pass
+
+    def linked(self, **kwargs):
+        return [LinkedCategory(question_set=category.question_set.linked(**kwargs),
+                               obj=category) for category in self]
 
 
 @python_2_unicode_compatible
@@ -238,7 +251,18 @@ class Category(TimeStampedModel):
 
 
 class QuestionQuerySet(models.QuerySet):
-    pass
+
+    def linked(self, password, participant, question_dict=None):
+        linked_question = []
+        question_dict = question_dict or {}
+        for question in self:
+            link = reverse('survey:survey', kwargs={'password': password,
+                                                    'participant': participant,
+                                                    'question': question.pk})
+            status = question.pk in question_dict
+            link = 'http://%s%s' % (Site.objects.get_current().domain, link)
+            linked_question.append(LinkedQuestion(question, link, status))
+        return linked_question
 
 
 @python_2_unicode_compatible
@@ -294,7 +318,9 @@ class Subquestion(TimeStampedModel):
 
 
 class AnswerQuerySet(models.QuerySet):
-    pass
+
+    def as_question_dict(self):
+        return {x.subquestion.question_id: x for x in self.select_related('subquestion')}
 
 
 @python_2_unicode_compatible

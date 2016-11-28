@@ -18,5 +18,3 @@ class ParticipantResource(resources.ModelResource):
 
     class Meta:
         model = Participant
-
-

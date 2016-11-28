@@ -2,27 +2,29 @@ from collections import namedtuple
 
 from braces.views import FormValidMessageMixin
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
-from django.views.generic import FormView, ListView
+from django.views.generic import FormView, ListView, View
 from reversion.views import RevisionMixin
 
-from .forms import ParticipantForm, SurveyForm
-from .models import Hospital, Participant
+from .forms import ParticipantForm, QuestionForm, SurveyForm
+from .models import Category, Hospital, Participant, Question, Survey
 
 SurveyHospitalForm = namedtuple('SurveyHospitalForm', ['hospital', 'form'])
 
 
-class HospitalMixin(object):
-    model = Hospital
+class ParticipantMixin(object):
 
     @cached_property
     def participant(self):
-        return get_object_or_404(Participant.objects.with_survey(),
+        return get_object_or_404(Participant.objects.with_survey().with_hospital(),
                                  password=self.kwargs['password'],
                                  pk=self.kwargs['participant'])
+
+
+class HospitalMixin(ParticipantMixin):
+    model = Hospital
 
     def get_queryset(self, *args, **kwargs):
         qs = super(HospitalMixin, self).get_queryset(*args, **kwargs)
@@ -48,6 +50,29 @@ class HospitalListView(HospitalMixin, ListView):
         return context
 
 
+class QuestionListView(ParticipantMixin, ListView):
+    model = Category
+    template_name = 'survey/question_list.html'
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(QuestionListView, self).get_queryset(*args, **kwargs)
+        return qs.select_related('survey').prefetch_related('question_set__subquestion_set')
+
+    def get_print_url(self):
+        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionListView, self).get_context_data(**kwargs)
+        question_dict = self.participant.answer_set.as_question_dict()
+        context['linked_categories'] = self.object_list.linked(question_dict=question_dict,
+                                                               **self.kwargs)
+        context['print_url'] = self.get_print_url()
+        context['participant'] = self.participant
+        context['survey'] = self.participant.survey
+        return context
+
+
 class SurveyPrintView(HospitalListView):
     template_name = 'survey/survey_print.html'
     form_class = SurveyForm
@@ -65,15 +90,9 @@ class SurveyPrintView(HospitalListView):
         return context
 
 
-class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
+class HospitalSurveyView(ParticipantMixin, RevisionMixin, FormValidMessageMixin, FormView):
     form_class = SurveyForm
     template_name = 'survey/hospital_form.html'
-
-    @cached_property
-    def participant(self):
-        return get_object_or_404(Participant.objects.with_survey(),
-                                 password=self.kwargs['password'],
-                                 pk=self.kwargs['participant'])
 
     @cached_property
     def survey(self):
@@ -114,18 +133,53 @@ class HospitalSurveyView(RevisionMixin, FormValidMessageMixin, FormView):
         return super(HospitalSurveyView, self).form_valid(form, *args, **kwargs)
 
 
-class ParticipantFormView(RevisionMixin, FormValidMessageMixin, FormView):
-    form_class = ParticipantForm
-    template_name = 'survey/participant_form.html'
+class QuestionSurveyView(ParticipantMixin, RevisionMixin, FormValidMessageMixin, FormView):
+    form_class = QuestionForm
+    template_name = 'survey/question_form.html'
 
     @cached_property
-    def participant(self):
-        try:
-            return Participant.objects.with_survey().with_hospital().get(
-                password=self.kwargs['password'],
-                pk=self.kwargs['participant'])
-        except Participant.DoesNotExist:
-            raise Http404
+    def survey(self):
+        return self.participant.survey
+
+    @cached_property
+    def question(self):
+        return get_object_or_404(Question.objects.select_related('category__survey').
+                                 prefetch_related('subquestion_set'),
+                                 pk=self.kwargs['question'])
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kw = super(QuestionSurveyView, self).get_form_kwargs(*args, **kwargs)
+        kw['participant'] = self.participant
+        kw['question'] = self.question
+        kw['user'] = self.request.user
+        return kw
+
+    def get_survey_list_url(self):
+        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
+                                              'participant': self.kwargs['participant']})
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionSurveyView, self).get_context_data(**kwargs)
+        context['survey'] = self.survey
+        context['question'] = self.question
+        context['subquestion_set'] = self.question.subquestion_set.all()
+        context['survey_list_url'] = self.get_survey_list_url()
+        return context
+
+    def get_success_url(self):
+        return self.get_survey_list_url()
+
+    def get_form_valid_message(self):
+        return _("Answer for {question} was saved!").format(question=self.question)
+
+    def form_valid(self, form, *args, **kwargs):
+        form.save()
+        return super(QuestionSurveyView, self).form_valid(form, *args, **kwargs)
+
+
+class ParticipantFormView(ParticipantMixin, RevisionMixin, FormValidMessageMixin, FormView):
+    form_class = ParticipantForm
+    template_name = 'survey/participant_form.html'
 
     def get_form_kwargs(self, *args, **kwargs):
         kw = super(ParticipantFormView, self).get_form_kwargs(*args, **kwargs)
@@ -156,3 +210,16 @@ class ParticipantFormView(RevisionMixin, FormValidMessageMixin, FormView):
     def form_valid(self, form, *args, **kwargs):
         form.save()
         return super(ParticipantFormView, self).form_valid(form, *args, **kwargs)
+
+
+class SurveyDispatchView(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        participant = get_object_or_404(Participant.objects.select_related('survey'),
+                                        password=self.kwargs['password'],
+                                        pk=self.kwargs['participant'])
+        dispatcher = {Survey.STYLE.total: ParticipantFormView,
+                      Survey.STYLE.hospital: HospitalListView,
+                      Survey.STYLE.question: QuestionListView}
+        handler = dispatcher[participant.survey.style].as_view()
+        return handler(request, *args, **kwargs)

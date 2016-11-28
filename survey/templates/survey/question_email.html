@@ -1,0 +1,12 @@
+Szanowni Państwo,
+
+Uprzejmie potwierdzamy zapisanie odpowiedzi {{participant.health_fund}} na pytanie {{question}}. 
+
+Poniżej przedstawiamy zestawienie udzielonych odpowiedzi.:
+# {{question.category}}
+## {{question}}
+{% for subquestion, answer_set in subquestion_set %}### {{subquestion}}
+{% for hospital, data in answer_set %}- {{hospital}}: {{data}}
+{% endfor %}
+{% endfor %}
+Z poważaniem,
