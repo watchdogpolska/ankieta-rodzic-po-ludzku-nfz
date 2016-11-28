@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-28 09:27+0000\n"
-"PO-Revision-Date: 2016-11-28 04:11+0100\n"
+"POT-Creation-Date: 2016-11-28 12:41+0000\n"
+"PO-Revision-Date: 2016-11-28 13:41+0100\n"
 "Last-Translator: Adam Dobrawy <naczelnik@jawnosc.tk>\n"
 "Language-Team: \n"
 "Language: pl\n"
@@ -39,43 +39,43 @@ msgstr "Przegląd ankiety"
 msgid "Overview"
 msgstr "Przegląd"
 
-#: admin.py:159
+#: admin.py:161
 msgid "Statistics of progress of analysis"
 msgstr "Statystyki postępu analizy"
 
-#: admin.py:160
+#: admin.py:162
 msgid "Statistics"
 msgstr "Statystyki"
 
-#: admin.py:176
+#: admin.py:178
 msgid "Solve url"
 msgstr "Adres rozwiązywania"
 
-#: admin.py:189 templates/survey/survey_admin_stats.html:33
+#: admin.py:191 templates/survey/survey_admin_stats.html:33
 msgid "Progress"
 msgstr "Postęp"
 
-#: admin.py:216
+#: admin.py:218
 msgid "Edit survey"
 msgstr "Edytuj ankietę"
 
-#: admin.py:217
+#: admin.py:219
 msgid "Edit a parent survey"
 msgstr "Edytuj nadrzędną ankietę"
 
-#: admin.py:245
+#: admin.py:247
 msgid "Edit category"
 msgstr "Edytuj ktegorię"
 
-#: admin.py:246
+#: admin.py:248
 msgid "Edit a parent category"
 msgstr "Edytuj nadrzędną kategorię"
 
-#: admin.py:272
+#: admin.py:274
 msgid "Edit question"
 msgstr "Edytuj pytanie"
 
-#: admin.py:273
+#: admin.py:275
 msgid "Edit a parent question"
 msgstr "Edytuj nadrzędne pytanie"
 
@@ -83,11 +83,24 @@ msgstr "Edytuj nadrzędne pytanie"
 msgid "Survey"
 msgstr "Ankieta"
 
-#: forms.py:128 forms.py:217 forms.py:321
+#: forms.py:23
+msgid " and "
+msgstr " i"
+
+#: forms.py:25
+#, python-brace-format
+msgid ""
+"The value entered \"{value}\" is incorrect. Only allowable values of "
+"{values} and numbers."
+msgstr ""
+"Wprowadzona wartośc \"{value}\" jest nieprawidłowa. Dozwolone są wyłącznie "
+"{values} oraz liczby."
+
+#: forms.py:160 forms.py:249 forms.py:353
 msgid "Answer confirmation"
 msgstr "Potwierdzenie odpowiedzi"
 
-#: models.py:34 models.py:76 models.py:236 models.py:271 models.py:300
+#: models.py:34 models.py:76 models.py:236 models.py:271 models.py:303
 msgid "Name"
 msgstr "Nazwa"
 
@@ -123,7 +136,7 @@ msgstr "Narodowe Fundusze Zdrowia"
 msgid "The internal identifier used to connect foundation database"
 msgstr "Wewnętrzny identyfikator wykorzystywany do łączenia z bazą fundacji"
 
-#: models.py:86 models.py:330
+#: models.py:86 models.py:333
 msgid "Hospital"
 msgstr "Szpital"
 
@@ -187,7 +200,7 @@ msgstr "Hasło"
 msgid "Answer count"
 msgstr "Liczba odpowiedzi"
 
-#: models.py:218 models.py:328
+#: models.py:218 models.py:331
 msgid "Participant"
 msgstr "Uczestnik"
 
@@ -195,7 +208,7 @@ msgstr "Uczestnik"
 msgid "Description"
 msgstr "Opis"
 
-#: models.py:238 models.py:272 models.py:301
+#: models.py:238 models.py:272 models.py:304
 msgid "Order"
 msgstr "Kolejnosć"
 
@@ -207,7 +220,7 @@ msgstr "Kategoria"
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models.py:279 models.py:299 templates/survey/survey_admin_overview.html:9
+#: models.py:279 models.py:302 templates/survey/survey_admin_overview.html:9
 msgid "Question"
 msgstr "Pytanie"
 
@@ -215,23 +228,23 @@ msgstr "Pytanie"
 msgid "Questions"
 msgstr "Pytania"
 
-#: models.py:302
+#: models.py:305
 msgid "Kind of answer"
 msgstr "Typ odpowiedzi"
 
-#: models.py:312 templates/survey/survey_admin_overview.html:11
+#: models.py:315 templates/survey/survey_admin_overview.html:11
 msgid "Subquestion"
 msgstr "Podpytanie"
 
-#: models.py:313 models.py:329
+#: models.py:316 models.py:332
 msgid "Subquestions"
 msgstr "Podpytania"
 
-#: models.py:331 models.py:335
+#: models.py:334 models.py:338
 msgid "Answer"
 msgstr "Odpowiedź"
 
-#: models.py:336
+#: models.py:339
 msgid "Answers"
 msgstr "Odpowiedzi"
 

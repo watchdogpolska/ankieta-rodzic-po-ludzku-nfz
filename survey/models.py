@@ -293,9 +293,12 @@ class Subquestion(TimeStampedModel):
     KIND_INT = 'int'
     KIND_TEXT = 'text'
     KIND_LTEXT = 'ltext'
+    KIND_VINT = 'vint'
     KIND = ((KIND_INT, 'Integer'),
             (KIND_TEXT, 'Text'),
-            (KIND_LTEXT, 'Long text'))
+            (KIND_LTEXT, 'Long text'),
+            (KIND_VINT, 'Value or text'),
+            )
     question = models.ForeignKey(to=Question, verbose_name=_("Question"))
     name = models.CharField(verbose_name=_("Name"), max_length=100)
     ordering = models.PositiveSmallIntegerField(verbose_name=_("Order"), default=1)

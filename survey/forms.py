@@ -7,10 +7,38 @@ from django.core.mail import send_mail
 from django.db.models import F
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
-
+from django.core.exceptions import ValidationError
 from .models import Answer, Hospital, Participant, Subquestion
 
 Group = namedtuple('Group', ['obj', 'set'])
+
+
+class values_or_integer_validator(object):
+
+    def __init__(self, values, code='invalid'):
+        self.values = values
+        self.code = code
+
+    def get_message(self, value):
+        values_str = _(" and ").join('"%s"'.format(x) for x in self.values)
+
+        return _('The value entered "{value}" is incorrect. ' +
+                 'Only allowable values of {values} and numbers.').format(value=value,
+                                                                          values=values_str)
+
+    def valid_int(self, value):
+        try:
+            int(value)
+        except ValueError:
+            return False
+        return True
+
+    def __call__(self, value):
+        """
+        Validates that the input is some values or it is integer
+        """
+        if not (value in self.values or self.valid_int(value)):
+            raise ValidationError(self.get_message(value), code=self.code)
 
 
 class FieldMixin(object):
@@ -26,6 +54,10 @@ class FieldMixin(object):
             return forms.CharField(label=subquestion.name,
                                    initial=self.get_initial(subquestion, *args, **kwargs),
                                    widget=forms.widgets.Textarea())
+        if subquestion.kind == Subquestion.KIND_VINT:
+            return forms.CharField(label=subquestion.name,
+                                   initial=self.get_initial(subquestion, *args, **kwargs),
+                                   validators=[values_or_integer_validator(['b/d', 'brak danych'])])
 
     def get_recipient(self):
         recipients = [x.email for x in User.objects.filter(is_staff=True, notification=True).all()]

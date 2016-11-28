@@ -1,13 +1,14 @@
 from ankieta_nfz.users.factories import UserFactory
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from .factories import (AnswerFactory, CategoryFactory, HospitalFactory,
                         NationalHealtFundFactory, ParticipantFactory,
                         QuestionFactory, SubquestionFactory, SurveyFactory)
-from .forms import ParticipantForm, QuestionForm, SurveyForm
-from .models import (Answer, Category, Participant, Question, Subquestion,
-                     Survey)
+from .forms import (ParticipantForm, QuestionForm, SurveyForm,
+                    values_or_integer_validator)
+from .models import Subquestion
 
 
 class NationalHealtFundFactoryTestCase(TestCase):
@@ -333,6 +334,24 @@ class QuestionFormTestCase(TestCase):
                             user=UserFactory())
         self.assertEqual(form.is_valid(), False)
 
+    def test_values_or_integer_validation(self):
+        TEST_CASES = {'123': True,
+                      'b/d': True,
+                      'BLABLA': False,
+                      '': False}
+        sq = SubquestionFactory(question=self.question,
+                                kind=Subquestion.KIND_VINT)
+
+        for value, result in TEST_CASES.items():
+            data = self._get_standard_data()
+            for hospital in self.hospitals:
+                data['h-%d-sq-%d' % (hospital.pk, sq.pk)] = value
+            form = QuestionForm(data,
+                                question=self.question,
+                                participant=self.participant,
+                                user=UserFactory())
+            self.assertEqual(form.is_valid(), result, 'Validation failed for {0}'.format(value))
+
     def test_support_initial(self):
         answer = AnswerFactory(answer="Unique-answer-content",
                                subquestion=self.subquestions[0],
@@ -342,3 +361,17 @@ class QuestionFormTestCase(TestCase):
                             question=self.question,
                             user=UserFactory())
         self.assertIn(answer.answer, form.as_p())
+
+
+class ValidatorsTestCase(TestCase):
+
+    def test_values_or_integer_validator(self):
+        valid = ['-1', '255', 'b/d', 'aaa']
+        invalid = ['xx', '255.2']
+
+        validator = values_or_integer_validator(values=['b/d', 'aaa'])
+        for value in valid:
+            validator(value)
+        for value in invalid:
+            with self.assertRaises(expected_exception=ValidationError):
+                validator(value)
