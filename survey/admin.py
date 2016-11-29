@@ -121,7 +121,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         def get_key(subquestion):
             return "{title}:{pk}".format(title=subquestion.name, pk=subquestion.pk)
 
-        fieldnames = ['Health fund', 'Hospital']
+        fieldnames = ['Health fund', 'Hospital', 'Identifier', ]
         fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
                        filter(question__category__survey=obj).all()]
         answer_qs = (Answer.objects.filter(participant__survey=obj).
@@ -135,7 +135,9 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
             return (x.participant.health_fund, x.hospital)
 
         for (participant, hospital), g in groupby(answer_qs, key):
-            row = {'Health fund': participant, 'Hospital': hospital}
+            row = {'Health fund': participant,
+                   'Hospital': hospital,
+                   'Identifier': hospital.identifier}
             row.update({get_key(answer.subquestion): answer.answer
                         for answer in g
                         if get_key(answer.subquestion) in fieldnames})
