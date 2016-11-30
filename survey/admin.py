@@ -1,18 +1,20 @@
 import csv
 from itertools import groupby
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.translation import ugettext_lazy as _
-from django_object_actions import (DjangoObjectActions)
-from reversion.admin import VersionAdmin
+from django_object_actions import DjangoObjectActions
 from import_export.admin import ImportExportMixin
-from .resources import ParticipantResource, NationalHealthFundResource, HospitalResource
+from reversion.admin import VersionAdmin
+
 from .models import (Answer, Category, Hospital, NationalHealtFund,
                      Participant, Question, Subquestion, Survey)
+from .resources import (HospitalResource, NationalHealthFundResource,
+                        ParticipantResource)
 
 
 class ParticipantInline(admin.TabularInline):
@@ -79,6 +81,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         ParticipantInline,
     ]
     search_fields = ('title', 'welcome_text', 'end_text', 'submit_text')
+    actions = ['update_subquestion_count', ]
 
     def is_valid(self, obj):
         return all(x.status is not False for x in obj.perform_audit())
@@ -163,6 +166,14 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
     stats.short_description = _("Statistics of progress of analysis")
     stats.label = _("Statistics")
 
+    def update_subquestion_count(modeladmin, request, queryset):
+        count = 0
+        for survey in queryset.with_db_subquestion_count().all():
+            survey.subquestion_count = survey.db_subquestion_count
+            survey.save(update_fields=['subquestion_count'])
+            count = count + 1
+        messages.success(request, 'Subquestion count of {0} surveys was updated.'.format(count))
+
 
 admin.site.register(Survey, SurveyAdmin)
 
@@ -182,6 +193,7 @@ class ParticipantAdmin(ImportExportMixin, VersionAdmin):
     list_filter = ('survey', 'health_fund')
     readonly_fields = ('answer_count',)
     resource_class = ParticipantResource
+    actions = ['update_answer_count', ]
 
     def get_queryset(self, *args, **kwargs):
         qs = super(ParticipantAdmin, self).get_queryset(*args, **kwargs)
@@ -191,6 +203,14 @@ class ParticipantAdmin(ImportExportMixin, VersionAdmin):
         return obj.get_progress_display()
     get_progress_display.admin_order_field = 'progress'
     get_progress_display.short_description = _('Progress')
+
+    def update_answer_count(modeladmin, request, queryset):
+        count = 0
+        for participant in queryset.with_db_answer_count().all():
+            participant.answer_count = participant.db_answer_count
+            participant.save(update_fields=['answer_count'])
+            count = count + 1
+        messages.success(request, 'Answer count of {0} participants was updated.'.format(count))
 
 
 admin.site.register(Participant, ParticipantAdmin)

@@ -173,6 +173,9 @@ class ParticipantQuerySet(models.QuerySet):
     def with_hospital(self):
         return self.prefetch_related('health_fund__hospital_set')
 
+    def with_db_answer_count(self):
+        return self.annotate(db_answer_count=Count('answer', distinct=True))
+
     def with_progress_stats(self):
         def fl(expr):
             return Cast(expr, models.FloatField())
