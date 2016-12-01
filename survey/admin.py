@@ -29,8 +29,10 @@ class HospitalAdmin(ImportExportMixin, VersionAdmin):
         Admin View for Hospital
     '''
     resource_class = HospitalResource
-    list_display = ('name', 'email', 'health_fund', 'identifier', 'created', 'modified')
+    list_display = ('name', 'email', 'health_fund', 'identifier', 'voivodeship', 'city',
+                    'created', 'modified')
     search_fields = ('name', 'email', 'identifier')
+    list_filter = ('voivodeship', )
 
 
 admin.site.register(Hospital, HospitalAdmin)
@@ -124,7 +126,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         def get_key(subquestion):
             return "{title}:{pk}".format(title=subquestion.name, pk=subquestion.pk)
 
-        fieldnames = ['Health fund', 'Hospital', 'Identifier', ]
+        fieldnames = ['Health fund', 'Hospital', 'Identifier', 'Voivodeship', 'City']
         fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
                        filter(question__category__survey=obj).all()]
         answer_qs = (Answer.objects.filter(participant__survey=obj).
@@ -140,7 +142,9 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         for (participant, hospital), g in groupby(answer_qs, key):
             row = {'Health fund': participant,
                    'Hospital': hospital,
-                   'Identifier': hospital.identifier}
+                   'Identifier': hospital.identifier,
+                   'Voivodeship': hospital.voivodeship,
+                   'City': hospital.city}
             row.update({get_key(answer.subquestion): answer.answer
                         for answer in g
                         if get_key(answer.subquestion) in fieldnames})
