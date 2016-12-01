@@ -4,6 +4,7 @@ from braces.views import FormValidMessageMixin
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
 from django.views.generic import (FormView, ListView, RedirectView,
@@ -293,6 +294,8 @@ class SurveyAcceptView(ParticipantMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         answer_count = self.participant.answer_set.count()
         if answer_count == self.participant.survey.subquestion_count:
+            self.participant.accept_on = timezone.now()
+            self.participant.save()
             messages.success(self.request, _("Survey was accepted!"))
         else:
             messages.warning(self.request, _("The answers to all the questions is required!"))
