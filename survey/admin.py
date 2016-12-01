@@ -137,10 +137,10 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         writer.writeheader()
 
         def key(x):
-            return (x.participant.health_fund, x.hospital)
+            return (x.participant.health_fund, x.hospital, x.participant)
 
-        for (participant, hospital), g in groupby(answer_qs, key):
-            row = {'Health fund': participant,
+        for (health_fund, hospital, participant), g in groupby(answer_qs, key):
+            row = {'Health fund': health_fund,
                    'Hospital': hospital,
                    'Identifier': hospital.identifier,
                    'Voivodeship': hospital.voivodeship,
