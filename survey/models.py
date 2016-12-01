@@ -194,6 +194,7 @@ class Participant(TimeStampedModel):
     survey = models.ForeignKey(Survey, verbose_name=_("Survey"), on_delete=models.CASCADE)
     password = models.CharField(verbose_name=_("Password"), default=get_secret, max_length=15)
     answer_count = models.IntegerField(verbose_name=_("Answer count"), default=0)
+    accept_on = models.DateTimeField(null=True, blank=True, verbose_name=_("Accept on"))
     objects = ParticipantQuerySet.as_manager()
 
     def get_answer_count(self):

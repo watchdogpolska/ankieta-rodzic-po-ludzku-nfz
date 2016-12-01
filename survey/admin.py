@@ -126,7 +126,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
         def get_key(subquestion):
             return "{title}:{pk}".format(title=subquestion.name, pk=subquestion.pk)
 
-        fieldnames = ['Health fund', 'Hospital', 'Identifier', 'Voivodeship', 'City']
+        fieldnames = ['Health fund', 'Hospital', 'Identifier', 'Voivodeship', 'City', 'Accept on']
         fieldnames += [get_key(subquestion) for subquestion in Subquestion.objects.
                        filter(question__category__survey=obj).all()]
         answer_qs = (Answer.objects.filter(participant__survey=obj).
@@ -144,7 +144,8 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
                    'Hospital': hospital,
                    'Identifier': hospital.identifier,
                    'Voivodeship': hospital.voivodeship,
-                   'City': hospital.city}
+                   'City': hospital.city,
+                   'Accept on': str(participant.accept_on)}
             row.update({get_key(answer.subquestion): answer.answer
                         for answer in g
                         if get_key(answer.subquestion) in fieldnames})
@@ -193,7 +194,8 @@ class ParticipantAdmin(ImportExportMixin, VersionAdmin):
         return '<a href="%s">%s</a>' % (url, url)
     solve_url.allow_tags = True
     solve_url.short_description = _("Solve url")
-    list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url', 'get_progress_display')
+    list_display = ('pk', 'survey', 'health_fund', 'password', 'solve_url',
+                    'get_progress_display', 'accept_on', )
     list_filter = ('survey', 'health_fund')
     readonly_fields = ('answer_count',)
     resource_class = ParticipantResource

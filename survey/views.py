@@ -1,11 +1,13 @@
 from collections import namedtuple
 
 from braces.views import FormValidMessageMixin
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
-from django.views.generic import FormView, ListView, TemplateView, View
+from django.views.generic import (FormView, ListView, RedirectView,
+                                  TemplateView, View)
 from reversion.views import RevisionMixin
 
 from .forms import ParticipantForm, QuestionForm, SurveyForm
@@ -23,6 +25,25 @@ class ParticipantMixin(object):
             get_object_or_404(Participant.objects.with_survey().with_hospital(),
                               password=self.kwargs['password'],
                               pk=self.kwargs['participant'])
+
+    def get_survey_list_url(self):
+        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
+                                              'participant': self.kwargs['participant']})
+
+    def get_survey_print_url(self):
+        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
+                                               'participant': self.kwargs['participant']})
+
+    def get_survey_accept_url(self):
+        return reverse('survey:accept', kwargs={'password': self.kwargs['password'],
+                                                'participant': self.kwargs['participant']})
+
+    def get_context_data(self, **kwargs):
+        context = super(ParticipantMixin, self).get_context_data(**kwargs)
+        context['list_url'] = self.get_survey_list_url()
+        context['print_url'] = self.get_survey_print_url()
+        context['accept_url'] = self.get_survey_accept_url()
+        return context
 
 
 class HospitalMixin(ParticipantMixin):
@@ -178,6 +199,7 @@ class QuestionSurveyView(ParticipantMixin, RevisionMixin, FormValidMessageMixin,
         index = question_list.index(self.question.pk)
         if index + 1 >= len(question_list):
             return None
+            messages.info(self.request, _("We have no more questions."))
         return reverse('survey:survey', kwargs={'password': self.participant.password,
                                                 'participant': self.participant.pk,
                                                 'question': question_list[index + 1]})
@@ -196,14 +218,6 @@ class ParticipantFormView(ParticipantMixin, RevisionMixin, FormValidMessageMixin
         kw['participant'] = self.participant
         kw['user'] = self.request.user
         return kw
-
-    def get_survey_list_url(self):
-        return reverse('survey:list', kwargs={'password': self.kwargs['password'],
-                                              'participant': self.kwargs['participant']})
-
-    def get_survey_print_url(self):
-        return reverse('survey:print', kwargs={'password': self.kwargs['password'],
-                                               'participant': self.kwargs['participant']})
 
     def get_form_valid_message(self):
         return _("Answer was saved!")
@@ -272,3 +286,14 @@ class SurveyPrintDispatchView(View):
                       Survey.PRINT_STYLE.per_participant: ParticipantPrintView}
         handler = dispatcher[participant.survey.print_style].as_view(cached_participant=participant)
         return handler(request, *args, **kwargs)
+
+
+class SurveyAcceptView(ParticipantMixin, RedirectView):
+
+    def get_redirect_url(self, *args, **kwargs):
+        answer_count = self.participant.answer_set.count()
+        if answer_count == self.participant.survey.subquestion_count:
+            messages.success(self.request, _("Survey was accepted!"))
+        else:
+            messages.warning(self.request, _("The answers to all the questions is required!"))
+        return self.get_survey_list_url()
