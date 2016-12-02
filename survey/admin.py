@@ -132,7 +132,7 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
                      select_related('participant__health_fund').
                      select_related('subquestion').
                      select_related('hospital').
-                     order_by('participant__health_fund', 'hospital', 'participant',).
+                     order_by('hospital_id',).
                      all())
         writer = csv.DictWriter(response, fieldnames=fieldnames)
         writer.writeheader()
