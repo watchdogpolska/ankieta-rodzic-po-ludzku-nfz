@@ -29,10 +29,9 @@ class HospitalAdmin(ImportExportMixin, VersionAdmin):
         Admin View for Hospital
     '''
     resource_class = HospitalResource
-    list_display = ('name', 'email', 'health_fund', 'identifier', 'voivodeship', 'city',
+    list_display = ('name', 'email', 'health_fund', 'identifier',
                     'created', 'modified')
     search_fields = ('name', 'email', 'identifier')
-    list_filter = ('voivodeship', )
 
 
 admin.site.register(Hospital, HospitalAdmin)
@@ -145,8 +144,6 @@ class SurveyAdmin(DjangoObjectActions, VersionAdmin):
             row = {'Health fund': health_fund,
                    'Hospital': hospital,
                    'Identifier': hospital.identifier,
-                   'Voivodeship': hospital.voivodeship,
-                   'City': hospital.city,
                    'Accept on': str(participant.accept_on)}
             row.update({get_key(answer.subquestion): answer.answer
                         for answer in g

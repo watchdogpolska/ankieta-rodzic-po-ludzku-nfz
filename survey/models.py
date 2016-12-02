@@ -80,8 +80,6 @@ class Hospital(TimeStampedModel):
         help_text=_('The internal identifier used to connect foundation database'),
         max_length=15,
         blank=True)
-    voivodeship = models.CharField(max_length=100, db_index=True, verbose_name=_("Voivodeship"))
-    city = models.CharField(max_length=100, verbose_name=_("City"))
     objects = HospitalQuerySet.as_manager()
 
     class Meta:
